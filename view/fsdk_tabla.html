@@ -1,0 +1,56 @@
+{include="header"}
+
+{if="$fsc->tabla"}
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="btn-group">
+            <a class="btn btn-sm btn-default" href="index.php?page=fsdk_home">
+               <span class="glyphicon glyphicon-arrow-left"></span>
+               <span class="hidden-xs">&nbsp; Atrás</span>
+            </a>
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
+            </a>
+         </div>
+         <div class="page-header">
+            <h1>
+               <i class="fa fa-database" aria-hidden="true"></i>
+               {$fsc->tabla}
+            </h1>
+         </div>
+      </div>
+   </div>
+</div>
+
+<ul class="nav nav-tabs" role="tablist">
+   <li role="presentation" class="active">
+      <a href="#xml" aria-controls="xml" role="tab" data-toggle="tab">
+         <i class="fa fa-file-excel-o" aria-hidden="true"></i> model/table/{$fsc->tabla}.xml
+      </a>
+   </li>
+</ul>
+<br/>
+<div class="tab-content">
+   <div role="tabpanel" class="tab-pane active" id="xml">
+      <div class="container-fluid">
+         <div class="row">
+            <div class="col-sm-12">
+               <p class="help-block">
+                  Este archivo le dice a FacturaScripts cómo es la estructura
+                  de esta tabla, para que el modelo correspondiente la genere
+                  o adapte si es necesario. Recuerda que debe estar en la carpeta
+                  <b>model/table</b> del plugin.
+                  <br/>
+                  <b>Aviso</b>: a veces la detección no es perfecta y aparece <b>(...)</b>
+                  en el archivo, tendrás que llenar esos huecos con las columnas que correspondan.
+               </p>
+               <textarea class="form-control" rows="40">{$fsc->xml}</textarea>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+{/if}
+
+{include="footer"}

@@ -1,0 +1,148 @@
+{include="header"}
+
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="page-header">
+            <h1>
+               <i class="fa fa-rocket" aria-hidden="true"></i>
+               FSDK
+               <span class="btn-group">
+                  <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
+                     <span class="glyphicon glyphicon-refresh"></span>
+                  </a>
+                  {if="$fsc->page->is_default()"}
+                  <a class="btn btn-xs btn-default active" href="{$fsc->url()}&amp;default_page=FALSE" title="desmarcar como página de inicio">
+                     <span class="glyphicon glyphicon-home"></span>
+                  </a>
+                  {else}
+                  <a class="btn btn-xs btn-default" href="{$fsc->url()}&amp;default_page=TRUE" title="marcar como página de inicio">
+                     <span class="glyphicon glyphicon-home"></span>
+                  </a>
+                  {/if}
+               </span>
+            </h1>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-3">
+         <a href="#" class="btn btn-sm btn-block btn-default" data-toggle="modal" data-target="#modal_datos_prueba">
+            <i class="fa fa-magic" aria-hidden="true"></i> Generar datos de prueba...
+         </a>
+         <a href="#" class="btn btn-sm btn-block btn-default" data-toggle="modal" data-target="#modal_tablas">
+            <i class="fa fa-database" aria-hidden="true"></i> Tablas...
+         </a>
+      </div>
+      <div class="col-sm-9">
+         <p class="help-block">
+            Aquí encontrarás un conjunto de ayudas para el desarrollo y testeo de
+            plugins para FacturaScripts.
+         </p>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_datos_prueba" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <i class="fa fa-magic" aria-hidden="true"></i>
+               Generar datos de prueba
+            </h4>
+            <p class="help-block">
+               Selecciona qué datos quieres generar.
+            </p>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-sm-6">
+                  <a href="{$fsc->url()}&gdp=fabricantes" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-folder" aria-hidden="true"></i> Fabricantes
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=familias" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-folder" aria-hidden="true"></i> Familias
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=articulos" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-cubes" aria-hidden="true"></i> Artículos
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=proveedores" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-users" aria-hidden="true"></i> Proveedores
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=albaranesprov" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-copy" aria-hidden="true"></i> {#FS_ALBARANES#} de compra
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=pedidosprov" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-copy" aria-hidden="true"></i> {#FS_PEDIDOS#} de compra
+                  </a>
+                  <br/>
+               </div>
+               <div class="col-sm-6">
+                  <a href="{$fsc->url()}&gdp=agentes" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-users" aria-hidden="true"></i> Empleados
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=clientes" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-users" aria-hidden="true"></i> Clientes
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=albaranescli" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-copy" aria-hidden="true"></i> {#FS_ALBARANES#} de venta
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=pedidoscli" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-copy" aria-hidden="true"></i> {#FS_PEDIDOS#} de venta
+                  </a>
+                  <br/>
+                  <a href="{$fsc->url()}&gdp=presupuestoscli" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-copy" aria-hidden="true"></i> {#FS_PRESUPUESTOS#} de venta
+                  </a>
+                  <br/>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_tablas" tabindex="-1" role="dialog">
+   <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <i class="fa fa-database" aria-hidden="true"></i>
+               Tablas
+            </h4>
+            <p class="help-block">
+               Selecciona una tabla para ver las opciones de generación.
+            </p>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               {loop="$fsc->tablas"}
+               <div class="col-sm-4">
+                  <a href="index.php?page=fsdk_tabla&table={$value['name']}" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-folder" aria-hidden="true"></i> {$value['name']}
+                  </a>
+                  <br/>
+               </div>
+               {/loop}
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+{include="footer"}
