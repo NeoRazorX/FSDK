@@ -11,6 +11,7 @@ require_model('agente.php');
 require_model('almacen.php');
 require_model('articulo.php');
 require_model('cliente.php');
+require_model('cuenta_banco_cliente.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('familia.php');
@@ -43,7 +44,7 @@ class generar_datos_prueba
    private $series;
    
    /**
-    * Constructor. Inicializamos tod lo necesario.
+    * Constructor. Inicializamos todo lo necesario.
     * @param fs_db2 $db
     * @param empresa $empresa
     */
@@ -398,6 +399,7 @@ class generar_datos_prueba
          {
             $num++;
             
+            /// añadimos la dirección
             $dir = new direccion_cliente();
             $dir->codcliente = $cliente->codcliente;
             $dir->codpais = $this->empresa->codpais;
@@ -412,6 +414,34 @@ class generar_datos_prueba
             $dir->direccion = $this->direccion();
             $dir->codpostal = mt_rand(1234, 99999);
             $dir->save();
+            
+            /// ¿Añadimos cuenta bancaria?
+            if( mt_rand(0, 1) == 0 )
+            {
+               $cuenta = new cuenta_banco_cliente();
+               $cuenta->codcliente = $cliente->codcliente;
+               $cuenta->descripcion = 'Banco '.mt_rand(1, 999);
+               $cuenta->iban = 'ES'.mt_rand(10, 99).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '
+                       .mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999);
+               $cuenta->swift = $this->random_string(8);
+               
+               $opcion = mt_rand(0, 2);
+               if($opcion == 0)
+               {
+                  $cuenta->swift = '';
+               }
+               else if($opcion == 1)
+               {
+                  $cuenta->iban = '';
+               }
+               
+               if( mt_rand(0, 1) == 0 )
+               {
+                  $cuenta->fmandato = $cliente->fechaalta;
+               }
+               
+               $cuenta->save();
+            }
          }
          else
          {
@@ -586,7 +616,7 @@ class generar_datos_prueba
       $clientes = $cli0->all();
       shuffle($clientes);
       
-      while($num < 30)
+      while($num < 25)
       {
          $alb = new albaran_cliente();
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -637,7 +667,7 @@ class generar_datos_prueba
                $art0 = new articulo();
                $articulos = $art0->all();
                
-               $numlineas = mt_rand(1, 54);
+               $numlineas = mt_rand(1, 100);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_cliente();
@@ -725,7 +755,7 @@ class generar_datos_prueba
       $proveedores = $pro0->all();
       shuffle($proveedores);
       
-      while($num < 30)
+      while($num < 25)
       {
          $alb = new albaran_proveedor();
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -741,7 +771,7 @@ class generar_datos_prueba
             $alb->codalmacen = $this->almacenes[0]->codalmacen;
             $alb->codpago = $this->formas_pago[0]->codpago;
             $alb->coddivisa = $this->divisas[0]->coddivisa;
-            $alb->tasaconv = $this->divisas[0]->tasaconv;
+            $alb->tasaconv = $this->divisas[0]->tasaconv_compra;
             
             if($this->series[0]->codserie != 'R')
             {
@@ -758,7 +788,7 @@ class generar_datos_prueba
          {
             $alb->codejercicio = $eje->codejercicio;
             
-            $alb->codproveedor = $proveedores[0]->codproveedor;
+            $alb->codproveedor = $proveedores[$num]->codproveedor;
             $alb->nombre = $proveedores[$num]->razonsocial;
             $alb->cifnif = $proveedores[$num]->cifnif;
             
@@ -767,7 +797,7 @@ class generar_datos_prueba
                $art0 = new articulo();
                $articulos = $art0->all();
                
-               $numlineas = mt_rand(1, 54);
+               $numlineas = mt_rand(1, 100);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_proveedor();
@@ -1015,7 +1045,7 @@ class generar_datos_prueba
             $ped->codalmacen = $this->almacenes[0]->codalmacen;
             $ped->codpago = $this->formas_pago[0]->codpago;
             $ped->coddivisa = $this->divisas[0]->coddivisa;
-            $ped->tasaconv = $this->divisas[0]->tasaconv;
+            $ped->tasaconv = $this->divisas[0]->tasaconv_compra;
             
             if($this->series[0]->codserie != 'R')
             {
@@ -1032,7 +1062,7 @@ class generar_datos_prueba
          {
             $ped->codejercicio = $eje->codejercicio;
             
-            $ped->codproveedor = $proveedores[0]->codproveedor;
+            $ped->codproveedor = $proveedores[$num]->codproveedor;
             $ped->nombre = $proveedores[$num]->razonsocial;
             $ped->cifnif = $proveedores[$num]->cifnif;
             
@@ -1295,5 +1325,16 @@ class generar_datos_prueba
       {
          return $observaciones[0];
       }
+   }
+   
+   /**
+    * Devuelve un string aleatorio de longitud $length
+    * @param type $length la longitud del string
+    * @return type la cadena aleatoria
+    */
+   private function random_string($length = 30)
+   {
+      return mb_substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+              0, $length);
    }
 }
