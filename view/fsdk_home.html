@@ -1,5 +1,17 @@
 {include="header"}
 
+{if="$fsc->url_recarga"}
+<script type="text/javascript">
+   function recargar()
+   {
+      window.location.href = '{$fsc->url_recarga}';
+   }
+   $(document).ready(function() {
+      setTimeout(recargar, 5000);
+   });
+</script>
+{/if}
+
 <div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">

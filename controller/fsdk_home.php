@@ -15,6 +15,7 @@ require_once __DIR__.'/../lib/generar_datos_prueba.php';
 class fsdk_home extends fs_controller
 {
    public $tablas;
+   public $url_recarga;
    
    public function __construct()
    {
@@ -23,6 +24,8 @@ class fsdk_home extends fs_controller
    
    protected function private_core()
    {
+      $this->url_recarga = FALSE;
+      
       if( isset($_GET['gdp']) )
       {
          $gdp = new generar_datos_prueba($this->db, $this->empresa);
@@ -56,6 +59,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->articulos();
                   $this->new_message('Generados '.$num.' artículos.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=articulos';
                }
                else
                {
@@ -68,6 +74,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->clientes();
                   $this->new_message('Generados '.$num.' clientes.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=clientes';
                }
                else
                {
@@ -85,6 +94,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->proveedores();
                   $this->new_message('Generados '.$num.' proveedores.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=proveedores';
                }
                else
                {
@@ -97,6 +109,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->presupuestoscli();
                   $this->new_message('Generados '.$num.' '.FS_PRESUPUESTOS.' de venta.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=presupuestoscli';
                }
                else
                {
@@ -109,6 +124,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->pedidosprov();
                   $this->new_message('Generados '.$num.' '.FS_PEDIDOS.' de compra.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=pedidosprov';
                }
                else
                {
@@ -121,6 +139,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->pedidoscli();
                   $this->new_message('Generados '.$num.' '.FS_PEDIDOS.' de venta.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=pedidoscli';
                }
                else
                {
@@ -133,6 +154,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->albaranesprov();
                   $this->new_message('Generados '.$num.' '.FS_ALBARANES.' de compra.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=albaranesprov';
                }
                else
                {
@@ -145,6 +169,9 @@ class fsdk_home extends fs_controller
                {
                   $num = $gdp->albaranescli();
                   $this->new_message('Generados '.$num.' '.FS_ALBARANES.' de venta.');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=albaranescli';
                }
                else
                {
