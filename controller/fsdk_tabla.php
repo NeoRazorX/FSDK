@@ -283,7 +283,7 @@ class fsdk_tabla extends fs_controller
       $encontrada = FALSE;
       foreach($this->columnas as $col)
       {
-         if($col['extra'] == 'auto_increment')
+         if($col['key'] == 'PRI')
          {
             $this->modelo .= $tab.$tab.$tab.'if( is_null($this->'.$col['column_name'].") )\n"
                     . $tab.$tab.$tab."{\n"
@@ -322,7 +322,7 @@ class fsdk_tabla extends fs_controller
       $encontrada = FALSE;
       foreach($this->columnas as $col)
       {
-         if($col['extra'] == 'auto_increment')
+         if($col['key'] == 'PRI')
          {
             $this->modelo .= $tab.$tab.$tab.'return $this->db->exec('."'DELETE FROM ".$this->tabla
                     . " WHERE ".$col['column_name']." = '".'.$this->var2str($this->'.$col['column_name'].').'."';');\n";
