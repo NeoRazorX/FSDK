@@ -1,6 +1,13 @@
 {include="header"}
 
 {if="$fsc->tabla"}
+<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
+<script type="text/javascript">
+   $(document).ready(function() {
+      new Clipboard('.btn');
+   });
+</script>
+
 <div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
@@ -29,13 +36,18 @@
          <i class="fa fa-file-excel-o" aria-hidden="true"></i> model/table/{$fsc->tabla}.xml
       </a>
    </li>
+   <li role="presentation">
+      <a href="#modelo" aria-controls="modelo" role="tab" data-toggle="tab">
+         <i class="fa fa-file-code-o" aria-hidden="true"></i> model/{$fsc->nombre_modelo}.php
+      </a>
+   </li>
 </ul>
 <br/>
 <div class="tab-content">
    <div role="tabpanel" class="tab-pane active" id="xml">
       <div class="container-fluid">
          <div class="row">
-            <div class="col-sm-12">
+            <div class="col-sm-10">
                <p class="help-block">
                   Este archivo le dice a FacturaScripts cómo es la estructura
                   de esta tabla, para que el modelo correspondiente la genere
@@ -45,7 +57,45 @@
                   <b>Aviso</b>: a veces la detección no es perfecta y aparece <b>(...)</b>
                   en el archivo, tendrás que llenar esos huecos con las columnas que correspondan.
                </p>
-               <textarea class="form-control" rows="40">{$fsc->xml}</textarea>
+            </div>
+            <div class="col-sm-2 text-right">
+               <button class="btn btn-sm btn-default" data-clipboard-target="#txt_xml">
+                  <span class="glyphicon glyphicon-scissors" aria-hidden="true"></span>&nbsp; Copiar
+               </button>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <br/>
+               <div class="form-group">
+                  <textarea id='txt_xml' class="form-control" rows="40">{$fsc->xml}</textarea>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div role="tabpanel" class="tab-pane" id="modelo">
+      <div class="container-fluid">
+         <div class="row">
+            <div class="col-sm-10">
+               <p class="help-block">
+                  Esta clase sirve para leer/modificar/eliminar los datos de la
+                  tabla de la base de datos. Recuerda ponerlo en el directorio
+                  <b>model</b> del plugin.
+               </p>
+            </div>
+            <div class="col-sm-2 text-right">
+               <button class="btn btn-sm btn-default" data-clipboard-target="#txt_modelo">
+                  <span class="glyphicon glyphicon-scissors" aria-hidden="true"></span>&nbsp; Copiar
+               </button>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <br/>
+               <div class="form-group">
+                  <textarea id='txt_modelo' class="form-control" rows="40">{$fsc->modelo}</textarea>
+               </div>
             </div>
          </div>
       </div>

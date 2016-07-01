@@ -7,8 +7,12 @@
 
 class fsdk_tabla extends fs_controller
 {
+   public $modelo;
+   public $nombre_modelo;
    public $tabla;
    public $xml;
+   
+   private $columnas;
    
    public function __construct()
    {
@@ -27,7 +31,8 @@ class fsdk_tabla extends fs_controller
       {
          $this->page->title = 'Tabla '.  $this->tabla;
          
-         $this->xml = $this->export_structure_xml($this->tabla);
+         $this->export_structure_xml();
+         $this->generar_modelo();
       }
       else
       {
@@ -47,13 +52,13 @@ class fsdk_tabla extends fs_controller
       }
    }
    
-   public function export_structure_xml($table)
+   public function export_structure_xml()
    {
       $cadena_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!--
-    Document   : " . $table . ".xml
+    Document   : " . $this->tabla . ".xml
     Description:
-        Estructura de la tabla " . $table . ".
+        Estructura de la tabla " . $this->tabla . ".
 -->
 
 <tabla>
@@ -61,17 +66,17 @@ class fsdk_tabla extends fs_controller
 
       /// creamos el xml
       $archivo_xml = simplexml_load_string($cadena_xml);
-      $columnas = Array();
+      $this->columnas = Array();
       $restricciones = Array();
-      if( $this->db->table_exists($table) )
+      if( $this->db->table_exists($this->tabla) )
       {
          $primary_key = '...';
-         $columnas = $this->db->get_columns($table);
-         $restricciones = $this->db->get_constraints($table);
+         $this->columnas = $this->db->get_columns($this->tabla);
+         $restricciones = $this->db->get_constraints($this->tabla);
          
-         if($columnas)
+         if($this->columnas)
          {
-            foreach($columnas as $col)
+            foreach($this->columnas as $col)
             {
                $aux = $archivo_xml->addChild('columna');
                $aux->addChild('nombre', $col['column_name']);
@@ -106,9 +111,9 @@ class fsdk_tabla extends fs_controller
                   else
                      $aux->addChild('nulo', 'NO');
                   
-                  $aux->addChild('defecto', "nextval('".$table.'_'.$col['column_name']."_seq'::regclass)");
+                  $aux->addChild('defecto', "nextval('".$this->tabla.'_'.$col['column_name']."_seq'::regclass)");
                }
-               else if($col['data_type'] == 'integer' AND $col['column_default'] == "nextval('".$table.'_'.$col['column_name']."_seq'::regclass)") /// comprobamos si es tipo serial
+               else if($col['data_type'] == 'integer' AND $col['column_default'] == "nextval('".$this->tabla.'_'.$col['column_name']."_seq'::regclass)") /// comprobamos si es tipo serial
                {
                   $primary_key = $col['column_name'];
                   
@@ -155,7 +160,7 @@ class fsdk_tabla extends fs_controller
                
                if($col['restriccion'] == 'PRIMARY')
                {
-                  $aux->addChild('nombre', $table.'_pkey');
+                  $aux->addChild('nombre', $this->tabla.'_pkey');
                }
                else
                   $aux->addChild('nombre', $col['restriccion']);
@@ -194,6 +199,104 @@ class fsdk_tabla extends fs_controller
          }
       }
       
-      return $archivo_xml->asXML();
+      $this->xml = $archivo_xml->asXML();
+   }
+   
+   private function generar_modelo()
+   {
+      $this->nombre_modelo = $this->tabla;
+      if( substr($this->nombre_modelo, -1) == 's' )
+      {
+         $this->nombre_modelo = substr($this->nombre_modelo, 0, -1);
+      }
+      
+      $tab = '   ';
+      $this->modelo = "<?php\n\n"
+              . "class ".$this->nombre_modelo." extends fs_controller\n{\n";
+      
+      foreach($this->columnas as $col)
+      {
+         $this->modelo .= $tab.'public $'.$col['column_name'].";\n";
+      }
+      
+      $this->modelo .= "\n"
+              . $tab.'public function __construct($d=FALSE)'."\n"
+              . $tab."{\n"
+              . $tab.$tab."parent::__construct('".$this->tabla."');\n"
+              . $tab.$tab.'if($d)'."\n"
+              . $tab.$tab."{\n";
+      
+      foreach($this->columnas as $col)
+      {
+         if($col['data_type'] == 'boolean' OR $col['data_type'] == 'tinyint(1)')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name'].' = $this->str2bool($d'."['".$col['column_name']."']);\n";
+         }
+         else if($col['data_type'] == 'date')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name'].' = date("d-m-Y", strtotime($d'."['".$col['column_name']."']));\n";
+         }
+         else if($col['data_type'] == 'double')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name'].' = floatval($d'."['".$col['column_name']."']);\n";
+         }
+         else
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name'].' = $d'."['".$col['column_name']."'];\n";
+         }
+      }
+      
+      $this->modelo .= $tab.$tab."}\n"
+              . $tab.$tab."else\n"
+              . $tab.$tab."{\n"
+              . $tab.$tab.$tab."/// valores predeterminados\n";
+      
+      foreach($this->columnas as $col)
+      {
+         if($col['data_type'] == 'boolean' OR $col['data_type'] == 'tinyint(1)')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name']." = FALSE;\n";
+         }
+         else if($col['data_type'] == 'date')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name']." = date('d-m-Y');\n";
+         }
+         else if($col['data_type'] == 'double')
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name']." = 0;\n";
+         }
+         else
+         {
+            $this->modelo .= $tab.$tab.$tab.'$this->'.$col['column_name']." = NULL;\n";
+         }
+      }
+      
+      $this->modelo .= $tab.$tab."}\n"
+              . $tab."}\n\n"
+              . $tab."public function install()\n"
+              . $tab."{\n"
+              . $tab.$tab."return '';\n"
+              . $tab."}\n\n"
+              . $tab."public function exists()\n"
+              . $tab."{\n"
+              . $tab.$tab."/// tu código aquí\n"
+              . $tab."}\n\n"
+              . $tab."public function save()\n"
+              . $tab."{\n"
+              . $tab.$tab.'if( $this->exists() )'."\n"
+              . $tab.$tab."{\n"
+              . $tab.$tab.$tab."/// tu código aquí\n"
+              . $tab.$tab."}\n"
+              . $tab.$tab."else\n"
+              . $tab.$tab."{\n"
+              . $tab.$tab.$tab."/// tu código aquí\n"
+              . $tab.$tab."}\n"
+              . $tab."}\n\n"
+              . $tab."public function delete()\n"
+              . $tab."{\n"
+              . $tab.$tab."/// tu código aquí\n"
+              . $tab.$tab.'return $this->db->exec('."'DELETE FROM ".$this->tabla." WHERE...')\n"
+              . $tab."}\n\n";
+      $this->modelo .= "}\n";
    }
 }
