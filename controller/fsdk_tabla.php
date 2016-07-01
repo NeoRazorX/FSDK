@@ -278,25 +278,65 @@ class fsdk_tabla extends fs_controller
               . $tab.$tab."return '';\n"
               . $tab."}\n\n"
               . $tab."public function exists()\n"
-              . $tab."{\n"
-              . $tab.$tab."/// tu código aquí\n"
-              . $tab."}\n\n"
+              . $tab."{\n";
+      
+      $encontrada = FALSE;
+      foreach($this->columnas as $col)
+      {
+         if($col['extra'] == 'auto_increment')
+         {
+            $this->modelo .= $tab.$tab.$tab.'if( is_null($this->'.$col['column_name'].") )\n"
+                    . $tab.$tab.$tab."{\n"
+                    . $tab.$tab.$tab.$tab."return FALSE;\n"
+                    . $tab.$tab.$tab."}\n"
+                    . $tab.$tab.$tab."else\n"
+                    . $tab.$tab.$tab."{\n"
+                    . $tab.$tab.$tab.$tab.'return $this->db->select('."'SELECT * FROM ".$this->tabla
+                    . " WHERE ".$col['column_name']." = '".'.$this->var2str($this->'.$col['column_name'].').'."';');\n"
+                    . $tab.$tab.$tab."}\n";
+            $encontrada = TRUE;
+            break;
+         }
+      }
+      
+      if(!$encontrada)
+      {
+         $this->modelo .= $tab.$tab.$tab."/// tu código aquí\n";
+      }
+      
+      $this->modelo .= $tab."}\n\n"
               . $tab."public function save()\n"
               . $tab."{\n"
               . $tab.$tab.'if( $this->exists() )'."\n"
               . $tab.$tab."{\n"
-              . $tab.$tab.$tab."/// tu código aquí\n"
+              . $tab.$tab.$tab."/// UPDATE ".$this->tabla." SET ... WHERE ...;\n"
               . $tab.$tab."}\n"
               . $tab.$tab."else\n"
               . $tab.$tab."{\n"
-              . $tab.$tab.$tab."/// tu código aquí\n"
+              . $tab.$tab.$tab."/// INSERT INTO ".$this->tabla." (...) VALUES (...);\n"
               . $tab.$tab."}\n"
               . $tab."}\n\n"
               . $tab."public function delete()\n"
-              . $tab."{\n"
-              . $tab.$tab."/// tu código aquí\n"
-              . $tab.$tab.'return $this->db->exec('."'DELETE FROM ".$this->tabla." WHERE...')\n"
-              . $tab."}\n\n";
+              . $tab."{\n";
+      
+      $encontrada = FALSE;
+      foreach($this->columnas as $col)
+      {
+         if($col['extra'] == 'auto_increment')
+         {
+            $this->modelo .= $tab.$tab.$tab.'return $this->db->exec('."'DELETE FROM ".$this->tabla
+                    . " WHERE ".$col['column_name']." = '".'.$this->var2str($this->'.$col['column_name'].').'."';');\n";
+            $encontrada = TRUE;
+            break;
+         }
+      }
+      
+      if(!$encontrada)
+      {
+         $this->modelo .= $tab.$tab.$tab."/// tu código aquí\n";
+      }
+      
+      $this->modelo .= $tab."}\n\n";
       $this->modelo .= "}\n";
    }
 }
