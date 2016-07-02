@@ -13,6 +13,15 @@
 {/if}
 
 <div class="container-fluid">
+	{if="$fsc->plugin_generado"}
+		{if="!$fsc->plugin_error"}
+			<div class="alert alert-success hidden-print">
+		{else}
+			<div class="alert alert-danger hidden-print">
+		{/if}
+	        	 <ul><li>{$fsc->msgplugin}</li></ul>
+	    	</div>	   	
+    {/if}
    <div class="row">
       <div class="col-sm-12">
          <div class="page-header">
@@ -70,6 +79,31 @@
          <p class="help-block">
             Selecciona una tabla de la base de datos para generar el <b>xml</b>
             y/o el <b>modelo</b> necesarios para crearla e interactuar con ella.
+         </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <br/>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-3">
+      	{if="$fsc->rights_ok"}
+         <a href="#" class="btn btn-sm btn-block btn-default" data-toggle="modal" data-target="#modal_nuevo_plugin">
+         {else}
+         <a href="#" class="btn btn-sm btn-block btn-default disabled" data-toggle="modal" data-target="#modal_nuevo_plugin">
+         {/if}
+            <i class="fa fa-plug" aria-hidden="true"></i> Generar nuevo plugin
+         </a>
+      </div>
+      <div class="col-sm-9">
+         <p class="help-block">
+            Crea un plugin básico con "hola mundo"
+            a partir de unos datos básicos
+            {if="!$fsc->rights_ok"}
+            	&nbsp;&nbsp;-- Desactivado por falta de permisos de escritura en el directorio plugins --
+            {/if}
          </p>
       </div>
    </div>
@@ -176,5 +210,52 @@
       </div>
    </div>
 </div>
-
+<form class="form-horizontal" role="form" name="f_nuevo_plugin" action="index.php?page=fsdk_home" method="post">  
+<div class="modal fade" id="modal_nuevo_plugin" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <i class="fa fa-plug" aria-hidden="true"></i>
+               Nuevo plugin
+            </h4>
+            <p class="help-block">
+               Genera un nuevo plugin
+            </p>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="form-group">
+                  <label class="col-sm-2 control-label text-capitalize">Nombre</label>
+                  <div class="col-sm-4">                     
+                     <input type="text" name="nombreplugin" value="holamundo" id="n_plugin" class="form-control" autocomplete="off">         
+                  </div>
+               </div>
+               <div class="form-group">
+                  <label class="col-sm-2 control-label text-capitalize">Fichero descripción</label>
+                  <div class="col-sm-8">                     
+                     <input type="text" name="descripcionplugin" value="" id="desc_plugin" class="form-control" autocomplete="off">         
+                  </div>
+               </div>
+               <div class="form-group">
+                  <label class="col-sm-2 control-label text-capitalize">Nombre modelo</label>
+                  <div class="col-sm-4">                     
+                     <input type="text" name="nombremodelo" value="" id="n_modelo" class="form-control" autocomplete="off">         
+                  </div>
+                  <input type="hidden" name="generarplugin" value="1">
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+               <button class="btn btn-sm btn-primary" type="submit">
+                  <span class="glyphicon glyphicon-repeat"></span> &nbsp; Generar
+               </button>
+         </div>         
+      </div>
+   </div>
+</div>
+</form>
 {include="footer"}
