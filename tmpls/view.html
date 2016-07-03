@@ -6,7 +6,7 @@
          <div class="page-header">
             <h1>
                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-               {$fsc->text}
+               {$fsc->texto}
                <span class="btn-group">
                   <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
                      <span class="glyphicon glyphicon-refresh"></span>
@@ -23,8 +23,56 @@
                </span>
             </h1>
             <p class="help-block">
-               {$fsc->text}
+               {$fsc->texto2}
             </p>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-6">
+         <p class="help-block">
+            Ahora vamos a mostrar los datos de la lista con la función <b>&#123;loop=""&#125;</b>.
+         </p>
+         <ul>
+            {loop="$fsc->lista"}
+            <li>{$value}</li>
+            {/loop}
+         </ul>
+      </div>
+      <div class="col-sm-6">
+         <p class="help-block">
+            <b>&#123;loop=""&#125;</b> tiene un contador $counter que empieza en 0.
+         </p>
+         <ul>
+            {loop="$fsc->lista"}
+            <li><b>{$counter}</b> {$value}</li>
+            {/loop}
+         </ul>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <h4>
+            Y ahora vamos a mostrar en una tabla los resultados de la consulta
+            <mark>select * from paises;</mark>
+         </h4>
+         <div class="table-responsive">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>Codpais</th>
+                     <th>ISO</th>
+                     <th>Nombre</th>
+                  </tr>
+               </thead>
+               {loop="$fsc->resultados_sql"}
+               <tr>
+                  <td>{$value['codpais']}</td>
+                  <td>{$value['codiso']}</td>
+                  <td>{$value['nombre']}</td>
+               </tr>
+               {/loop}
+            </table>
          </div>
       </div>
    </div>

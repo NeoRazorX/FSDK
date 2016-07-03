@@ -17,12 +17,6 @@ class fsdk_home extends fs_controller
    public $tablas;
    public $url_recarga;
    
-   /* generación de plugin */
-   public $rights_ok = false;
-   public $plugin_generado = false;
-   public $plugin_error = false;
-   public $msgplugin;
-   
    public function __construct()
    {
       parent::__construct(__CLASS__, 'FSDK', 'admin');
@@ -186,96 +180,90 @@ class fsdk_home extends fs_controller
                break;
          }
       }
-      
-      $this->tablas = $this->db->list_tables();
-            
-      $this->rights_ok = is_writable("plugins");
-      
-      if( isset($_POST['generarplugin']) )
+      else if( isset($_POST['generarplugin']) )
       {
-      	$this->plugin_generado = true;
-      	
-      	$nombre = "holamundo";
-      	if (isset($_POST['nombreplugin']))
-      		$nombre = $_POST['nombreplugin'];
-      	
-      	$desc = "";
-      	if (isset($_POST['descripcionplugin']))
-      		$desc = $_POST['descripcionplugin'];
-      	
-      	$modelo = "modelo";
-      	if (isset($_POST['nombremodelo']))
-      		$modelo = $_POST['nombremodelo'];
-      		
-      	if($this->_generarPlugin($nombre, $desc, $modelo))
-      	{      		
-      		$this->plugin_error = false;
-      		$this->msgplugin = "Se generó el plugin ".$nombre. " en el directorio plugins ";
+      	if( !is_writable("plugins") )
+         {
+            $this->new_message('No tienes permisos de escritura en la carpeta plugins.');
+         }
+      	else if( $this->generar_plugin($_POST['nombre'], $_POST['descripcion']) )
+      	{
+            $this->new_message("Se generó el plugin ".$_POST['nombre']." en el directorio plugins."
+                    . " Puedes activarlo desde el <a href='index.php?page=admin_home#plugins'>panel de control</a>.");
       	}
       	else
       	{
-      		$this->plugin_error = true;
-      		$this->msgplugin = "Hubo un problema al generar el plugin ".$nombre. ": Revise los logs de su servidor web.";
+            $this->new_error_msg("Hubo un problema al generar el plugin ".$_POST['nombre'].": Revise los logs de su servidor web.");
       	}
-      		
       }
       
+      $this->tablas = $this->db->list_tables();
    }
    
-   private function _generarPlugin($nombre, $descripcion, $modelo)
+   private function generar_plugin($nombre, $descripcion)
    {
-       if ($this->rights_ok)
-       {
-       		if (!$this->_creaEstructura($nombre))
-       			return false;
-       		if (!$this->_generaficheros($nombre, $descripcion, $modelo))
-       			return false;
-       }
-       else
-       	return false;
-       
-       return true;
+      if( !$this->crea_estructura($nombre) )
+      {
+         return FALSE;
+      }
+      else if( !$this->genera_ficheros($nombre, $descripcion) )
+      {
+         return FALSE;
+      }
+      else
+         return TRUE;
    }
    
-   private function _creaEstructura($nombre)
+   private function crea_estructura($nombre)
    {
-   		// creamos el dir del plugin
-   		if (mkdir("plugins/".$nombre))
+      $ok = FALSE;
+      
+      // creamos el dir del plugin
+   	if( mkdir("plugins/".$nombre) )
+   	{
+         $ok = TRUE;
+         
+         // creamos los directorios
+   		$dirs = array("controller", "view", "model");
+   		foreach($dirs as $dir)
    		{
-   			// creamos los directorios
-   			$dirs = array("controller", "view", "model");
-   			foreach ($dirs as $dir)
-   			{
-   				if (!mkdir("plugins/".$nombre."/".$dir))
-   					return false;
-   			}
+            if( !mkdir("plugins/".$nombre."/".$dir) )
+            {
+               $ok = FALSE;
+            }
    		}
-   		else
-   			return false;
-
-   		return true;
+   	}
+      
+      return $ok;
    }
    
-   private function _generaficheros($nombre, $descripcion, $modelo)
+   private function genera_ficheros($nombre, $descripcion)
    {
-   		if (!file_put_contents("plugins/".$nombre."/description", $descripcion))
-   			return false;
-   		if (!file_put_contents("plugins/".$nombre."/facturascripts.ini", 
-   								"version = 1\r\nversion_url = ''\r\nupdate_url = ''\r\n"))
-   			return false;
-   		/* CONTROLLER */
-   		$textcontroller = str_replace("holamundo", $nombre, file_get_contents (__DIR__.'/../tmpls/controller.php'));
-   		if (!file_put_contents("plugins/".$nombre."/controller/".$nombre.".php", $textcontroller))
-   			return false;
-   		/* VISTA */
-   		$textvista = file_get_contents (__DIR__.'/../tmpls/view.html');
-   		if (!file_put_contents("plugins/".$nombre."/view/".$nombre.".html", $textvista))
-   			return false;
-   		/* MODELO */
-   		$textmodelo = str_replace("holamundo", $nombre, file_get_contents (__DIR__.'/../tmpls/model.php'));
-   		if (!file_put_contents("plugins/".$nombre."/model/".$modelo.".php", $textmodelo))
-   			return false;
-   		
-   		return true;
+      $descripcion .= "\n<br/>Accesible desde Admin &gt; ".$nombre;
+      
+      if( !file_put_contents("plugins/".$nombre."/description", $descripcion) )
+      {
+         return FALSE;
+      }
+      if( !file_put_contents("plugins/".$nombre."/facturascripts.ini", "version = 1") )
+      {
+         return FALSE;
+      }
+      else
+      {
+         $textcontroller = str_replace( "holamundo", $nombre, file_get_contents(__DIR__.'/../tmpls/controller.php') );
+         $textvista = file_get_contents(__DIR__.'/../tmpls/view.html');
+         
+         if( !file_put_contents("plugins/".$nombre."/controller/".$nombre.".php", $textcontroller) )
+         {
+   			return FALSE;
+         }
+         else if( !file_put_contents("plugins/".$nombre."/view/".$nombre.".html", $textvista) )
+         {
+   			return FALSE;
+         }
+         else
+            return TRUE;
+      }
    }
 }
