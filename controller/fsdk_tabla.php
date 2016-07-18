@@ -212,7 +212,7 @@ class fsdk_tabla extends fs_controller
       
       $tab = '   ';
       $this->modelo = "<?php\n\n"
-              . "class ".$this->nombre_modelo." extends fs_controller\n{\n";
+              . "class ".$this->nombre_modelo." extends fs_model\n{\n";
       
       foreach($this->columnas as $col)
       {

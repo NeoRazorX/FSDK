@@ -70,7 +70,7 @@ class generar_datos_prueba
       $this->formas_pago = $fp->all();
       shuffle($this->formas_pago);
       
-      if( class_exists('fabricante') )
+      if( class_exists('impuesto') )
       {
          $imp = new impuesto();
          $this->impuestos = $imp->all();
@@ -432,24 +432,30 @@ class generar_datos_prueba
          {
             $num++;
             
-            /// añadimos la dirección
-            $dir = new direccion_cliente();
-            $dir->codcliente = $cliente->codcliente;
-            $dir->codpais = $this->empresa->codpais;
-            
-            if( mt_rand(0, 2) == 0 )
+            /// añadimos direcciones
+            $num_dirs = mt_rand(0, 3);
+            while($num_dirs > 0)
             {
-               $dir->codpais = $this->paises[0]->codpais;
+               $dir = new direccion_cliente();
+               $dir->codcliente = $cliente->codcliente;
+               $dir->codpais = $this->empresa->codpais;
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->codpais = $this->paises[0]->codpais;
+               }
+               
+               $dir->provincia = $this->provincia();
+               $dir->ciudad = $this->ciudad();
+               $dir->direccion = $this->direccion();
+               $dir->codpostal = mt_rand(1234, 99999);
+               $dir->save();
+               $num_dirs--;
             }
             
-            $dir->provincia = $this->provincia();
-            $dir->ciudad = $this->ciudad();
-            $dir->direccion = $this->direccion();
-            $dir->codpostal = mt_rand(1234, 99999);
-            $dir->save();
-            
-            /// ¿Añadimos cuenta bancaria?
-            if( mt_rand(0, 1) == 0 )
+            /// Añadimos cuentas bancarias
+            $num_cuentas = mt_rand(0, 3);
+            while($num_cuentas > 0)
             {
                $cuenta = new cuenta_banco_cliente();
                $cuenta->codcliente = $cliente->codcliente;
@@ -474,6 +480,7 @@ class generar_datos_prueba
                }
                
                $cuenta->save();
+               $num_cuentas--;
             }
          }
          else
@@ -538,24 +545,30 @@ class generar_datos_prueba
          {
             $num++;
             
-            /// añadimos la dirección
-            $dir = new direccion_proveedor();
-            $dir->codproveedor = $proveedor->codproveedor;
-            $dir->codpais = $this->empresa->codpais;
-            
-            if( mt_rand(0, 2) == 0 )
+            /// añadimos direcciones
+            $num_dirs = mt_rand(0, 3);
+            while($num_dirs)
             {
-               $dir->codpais = $this->paises[0]->codpais;
+               $dir = new direccion_proveedor();
+               $dir->codproveedor = $proveedor->codproveedor;
+               $dir->codpais = $this->empresa->codpais;
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->codpais = $this->paises[0]->codpais;
+               }
+               
+               $dir->provincia = $this->provincia();
+               $dir->ciudad = $this->ciudad();
+               $dir->direccion = $this->direccion();
+               $dir->codpostal = mt_rand(1234, 99999);
+               $dir->save();
+               $num_dirs--;
             }
             
-            $dir->provincia = $this->provincia();
-            $dir->ciudad = $this->ciudad();
-            $dir->direccion = $this->direccion();
-            $dir->codpostal = mt_rand(1234, 99999);
-            $dir->save();
-            
-            /// ¿Añadimos cuenta bancaria?
-            if( mt_rand(0, 1) == 0 )
+            /// Añadimos cuentas bancarias
+            $num_cuentas = mt_rand(0, 3);
+            while($num_cuentas > 0)
             {
                $cuenta = new cuenta_banco_proveedor();
                $cuenta->codproveedor = $proveedor->codproveedor;
@@ -575,6 +588,7 @@ class generar_datos_prueba
                }
                
                $cuenta->save();
+               $num_cuentas--;
             }
          }
          else
@@ -746,7 +760,11 @@ class generar_datos_prueba
                $alb->ciudad = $dir->ciudad;
                $alb->direccion = $dir->direccion;
                $alb->codpostal = $dir->codpostal;
-               break;
+               
+               if($dir->domfacturacion)
+               {
+                  break;
+               }
             }
             
             if( $alb->save() )
@@ -1038,7 +1056,11 @@ class generar_datos_prueba
                $ped->ciudad = $dir->ciudad;
                $ped->direccion = $dir->direccion;
                $ped->codpostal = $dir->codpostal;
-               break;
+               
+               if($dir->domenvio)
+               {
+                  break;
+               }
             }
             
             if( $ped->save() )
@@ -1327,7 +1349,11 @@ class generar_datos_prueba
                $presu->ciudad = $dir->ciudad;
                $presu->direccion = $dir->direccion;
                $presu->codpostal = $dir->codpostal;
-               break;
+               
+               if($dir->domfacturacion)
+               {
+                  break;
+               }
             }
             
             if( $presu->save() )
@@ -1473,7 +1499,12 @@ class generar_datos_prueba
               0, $length);
    }
    
-   private function random_clientes()
+   /**
+    * Devuelve un array con clientes aleatorios.
+    * @param type $recursivo
+    * @return \cliente
+    */
+   private function random_clientes($recursivo = TRUE)
    {
       $lista = array();
       
@@ -1491,11 +1522,21 @@ class generar_datos_prueba
             $lista[] = new cliente($d);
          }
       }
+      else if($recursivo)
+      {
+         $this->clientes();
+         $lista = $this->random_clientes(FALSE);
+      }
       
       return $lista;
    }
    
-   private function random_proveedores()
+   /**
+    * Devuelve un array con proveedores aleatorios.
+    * @param type $recursivo
+    * @return \proveedor
+    */
+   private function random_proveedores($recursivo = TRUE)
    {
       $lista = array();
       
@@ -1513,11 +1554,21 @@ class generar_datos_prueba
             $lista[] = new proveedor($d);
          }
       }
+      else if($recursivo)
+      {
+         $this->proveedores();
+         return $this->random_proveedores(FALSE);
+      }
       
       return $lista;
    }
    
-   private function random_agentes()
+   /**
+    * Devuelve un array con empleados aleatorios.
+    * @param type $recursivo
+    * @return \agente
+    */
+   private function random_agentes($recursivo = TRUE)
    {
       $lista = array();
       
@@ -1535,11 +1586,21 @@ class generar_datos_prueba
             $lista[] = new agente($d);
          }
       }
+      else if($recursivo)
+      {
+         $this->agentes();
+         return $this->random_agentes(FALSE);
+      }
       
       return $lista;
    }
    
-   private function random_articulos()
+   /**
+    * Devuelve un array con artículos aleatorios.
+    * @param type $recursivo
+    * @return \articulo
+    */
+   private function random_articulos($recursivo = TRUE)
    {
       $lista = array();
       
@@ -1556,6 +1617,11 @@ class generar_datos_prueba
          {
             $lista[] = new articulo($d);
          }
+      }
+      else if($recursivo)
+      {
+         $this->articulos();
+         return $this->random_articulos(FALSE);
       }
       
       return $lista;
