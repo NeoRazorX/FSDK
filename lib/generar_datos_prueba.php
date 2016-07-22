@@ -27,7 +27,7 @@ require_model('proveedor.php');
 require_model('serie.php');
 
 /**
- * Description of generar_datos_prueba
+ * Clase con todo tipo de funciones para generar datos aleatorios.
  *
  * @author Carlos García Gómez <neorazorx@gmail.com>
  */
@@ -45,7 +45,7 @@ class generar_datos_prueba
    private $series;
    
    /**
-    * Constructor. Inicializamos todo lo necesario.
+    * Constructor. Inicializamos todo lo necesario, y randomizamos.
     * @param fs_db2 $db
     * @param empresa $empresa
     */
@@ -90,11 +90,17 @@ class generar_datos_prueba
       shuffle($this->series);
    }
    
-   public function fabricantes()
+   /**
+    * Genera $max fabricantes aleatorios.
+    * Devuelve el número de fabricantes generados.
+    * @param int $max
+    * @return int
+    */
+   public function fabricantes($max = 50)
    {
       $num = 0;
       
-      while($num < 50)
+      while($num < $max)
       {
          $fabri = new fabricante();
          $fabri->nombre = $this->empresa();
@@ -113,12 +119,18 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function familias()
+   /**
+    * Genera $max familias aleatorias.
+    * Devuelve el número de familias creadas.
+    * @param type $max
+    * @return int
+    */
+   public function familias($max = 50)
    {
       $num = 0;
       $codfamilia = NULL;
       
-      while($num < 50)
+      while($num < $max)
       {
          $fam = new familia();
          $fam->descripcion = $this->empresa();
@@ -143,7 +155,14 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function txt2codigo($txt, $len = 8)
+   /**
+    * Acorta un string hasta $len y sustituye caracteres especiales.
+    * Devuelve el string acortado.
+    * @param type $txt
+    * @param type $len
+    * @return type
+    */
+   private function txt2codigo($txt, $len = 8)
    {
       $txt = str_replace( array(' ','-','_','&','ó',':'), array('','','','','O',''), strtoupper($txt));
       
@@ -157,7 +176,13 @@ class generar_datos_prueba
       }
    }
    
-   public function articulos()
+   /**
+    * Genera $max artículos aleatorios.
+    * Devuelve el número de artículos generados.
+    * @param type $max
+    * @return int
+    */
+   public function articulos($max = 50)
    {
       $num = 0;
       
@@ -167,23 +192,25 @@ class generar_datos_prueba
       $fam = new familia();
       $familias = $fam->all();
       
-      while($num < 50)
+      while($num < $max)
       {
          if( mt_rand(0, 2) == 0 )
          {
             shuffle($fabricantes);
             shuffle($familias);
-            shuffle($this->impuestos);
+            
+            if($this->impuestos[0]->iva <= 10)
+            {
+               shuffle($this->impuestos);
+            }
          }
          
          $art = new articulo();
-         $art->codfabricante = $fabricantes[0]->codfabricante;
-         $art->codfamilia = $familias[0]->codfamilia;
          $art->descripcion = $this->descripcion();
          $art->codimpuesto = $this->impuestos[0]->codimpuesto;
-         $art->set_pvp_iva( mt_rand(1, 200)*0.3 );
+         $art->set_pvp_iva( $this->precio(1, 49, 699) );
          $art->stockmin = mt_rand(0, 10);
-         $art->stockmax = mt_rand($art->stockmin+1, 1000);
+         $art->stockmax = mt_rand($art->stockmin+1, $art->stockmin+1000);
          
          $opcion = mt_rand(0, 2);
          if($opcion == 0)
@@ -205,6 +232,12 @@ class generar_datos_prueba
          else
          {
             $art->referencia = $this->random_string(10);
+         }
+         
+         if( mt_rand(0, 9) > 0 )
+         {
+            $art->codfabricante = $fabricantes[0]->codfabricante;
+            $art->codfamilia = $familias[0]->codfamilia;
          }
          
          if( mt_rand(0, 3) == 0 )
@@ -255,17 +288,21 @@ class generar_datos_prueba
       return $num;
    }
    
+   /**
+    * Devuelve una descripción de producto aleatoria.
+    * @return string
+    */
    private function descripcion()
    {
       $prefijos = array(
           'Jet', 'Jex', 'Max', 'Pro', 'FX', 'Neo', 'Maxi', 'Extreme', 'Sub',
-          'Ultra', 'Minga', 'Hiper', 'Giga', 'Mega', 'Super', 'Fusion'
+          'Ultra', 'Minga', 'Hiper', 'Giga', 'Mega', 'Super', 'Fusion', 'Broken'
       );
       shuffle($prefijos);
       
       $nombres = array(
           'Motor', 'Engine', 'Generator', 'Tool', 'Oviode', 'Box', 'Proton', 'Neutro',
-          'Radeon', 'GeForce', 'nForce', 'Labtech', 'Station'
+          'Radeon', 'GeForce', 'nForce', 'Labtech', 'Station', 'Arco', 'Arkam'
       );
       shuffle($nombres);
       
@@ -306,7 +343,7 @@ class generar_datos_prueba
             break;
          
          case 3:
-            $texto .= ': '.$descripciones1[0]."\n- ".$descripciones2[0]."\n- ".$descripciones2[1]."\n- ".$descripciones2[2]."\n- ".$descripciones2[3].'.';
+            $texto .= ': '.$descripciones1[0]." con:\n- ".$descripciones2[0]."\n- ".$descripciones2[1]."\n- ".$descripciones2[2]."\n- ".$descripciones2[3].'.';
             break;
          
          default:
@@ -317,11 +354,69 @@ class generar_datos_prueba
       return $texto;
    }
    
-   public function agentes()
+   /**
+    * Devuelve un número aleatorio entre $min y $max1.
+    * 1 de cada 10 veces lo devuelve entre $min y $max2.
+    * 1 de cada 5 veces lo devuelve con decimales.
+    * @param type $min
+    * @param type $max1
+    * @param type $max2
+    * @return type
+    */
+   private function cantidad($min, $max1, $max2)
+   {
+      $cantidad = mt_rand($min, $max1);
+      
+      if( mt_rand(0, 9) == 0 )
+      {
+         $cantidad = mt_rand($min, $max2);
+      }
+      else if( $cantidad < $max1 AND mt_rand(0, 4) == 0 )
+      {
+         $cantidad += round( mt_rand(1, 5) / mt_rand(1, 10), mt_rand(0, 3) );
+         $cantidad = min( array($max1, $cantidad) );
+      }
+      
+      return $cantidad;
+   }
+   
+   /**
+    * Devuelve un número aleatorio entre $min y $max1.
+    * 1 de cada 10 veces lo devuelve entre $min y $max2.
+    * 1 de cada 3 veces lo devuelve con decimales.
+    * @param type $min
+    * @param type $max1
+    * @param type $max2
+    * @return type
+    */
+   private function precio($min, $max1, $max2)
+   {
+      $precio = mt_rand($min, $max1);
+      
+      if( mt_rand(0, 9) == 0 )
+      {
+         $precio = mt_rand($min, $max2);
+      }
+      else if( $precio < $max1 AND mt_rand(0, 2) == 0 )
+      {
+         $precio += round( mt_rand(1, 5) / mt_rand(1, 10), FS_NF0_ART );
+         $precio = min( array($max1, $precio) );
+      }
+      
+      return $precio;
+   }
+   
+   /**
+    * Genera $max agentes (empleados) aleatorios.
+    * Devuelve el número de agentes generados.
+    * @param type $max
+    * @return int
+    */
+   public function agentes($max = 50)
    {
       $num = 0;
       
-      while($num < 50)
+      while($num < $max)
       {
          $agente = new agente();
          $agente->f_nacimiento = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(1970, 1997) );
@@ -354,6 +449,11 @@ class generar_datos_prueba
             $agente->email = $this->email();
          }
          
+         if( mt_rand(0, 5) == 0 )
+         {
+            $agente->porcomision = $this->cantidad(0, 5, 20);
+         }
+         
          $agente->codagente = $agente->get_new_codigo();
          if( $agente->save() )
          {
@@ -368,11 +468,17 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function clientes()
+   /**
+    * Genera $max clientes aleatorios.
+    * Devuelve el número de clientes generados.
+    * @param type $max
+    * @return int
+    */
+   public function clientes($max = 50)
    {
       $num = 0;
       
-      while($num < 50)
+      while($num < $max)
       {
          $cliente = new cliente();
          $cliente->fechaalta = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016) );
@@ -422,7 +528,7 @@ class generar_datos_prueba
             $cliente->email = $this->email();
          }
          
-         if( mt_rand(0, 3) == 0 )
+         if( mt_rand(0, 9) == 0 )
          {
             $cliente->regimeniva = 'Exento';
          }
@@ -492,11 +598,17 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function proveedores()
+   /**
+    * Genera $max proveedores aleatorios.
+    * Devuelve el número de proveedores generados.
+    * @param type $max
+    * @return int
+    */
+   public function proveedores($max = 50)
    {
       $num = 0;
       
-      while($num < 50)
+      while($num < $max)
       {
          $proveedor = new proveedor();
          $proveedor->cifnif = mt_rand(0, 99999999);
@@ -535,7 +647,7 @@ class generar_datos_prueba
             $proveedor->email = $this->email();
          }
          
-         if( mt_rand(0, 3) == 0 )
+         if( mt_rand(0, 9) == 0 )
          {
             $proveedor->regimeniva = 'Exento';
          }
@@ -600,6 +712,10 @@ class generar_datos_prueba
       return $num;
    }
    
+   /**
+    * Devuelve un nombre aleatorio.
+    * @return string
+    */
    private function nombre()
    {
       $nombres = array(
@@ -615,6 +731,10 @@ class generar_datos_prueba
       return $nombres[0];
    }
    
+   /**
+    * Devuelve dos apellidos aleatorios.
+    * @return type
+    */
    private function apellidos()
    {
       $apellidos = array(
@@ -629,6 +749,10 @@ class generar_datos_prueba
       return $apellidos[0].' '.$apellidos[1];
    }
    
+   /**
+    * Devuelve un nombre comercial aleatorio.
+    * @return type
+    */
    private function empresa()
    {
       $nombres = array(
@@ -637,7 +761,8 @@ class generar_datos_prueba
           'Miracle', 'NX', 'Smoke', 'Steam', 'Power', 'FX', 'Fusion', 'Bastion',
           'Investments', 'Solutions', 'Neo', 'Ming', 'Tube', 'Pear', 'Apple',
           'Dolphin', 'Chrome', 'Cat', 'Hat', 'Linux', 'Soft', 'Mobile', 'Phone',
-          'XL', 'Open', 'Thunder', 'Zero', 'Scorpio', 'Zelda', '10', 'V', 'Q', 'X'
+          'XL', 'Open', 'Thunder', 'Zero', 'Scorpio', 'Zelda', '10', 'V', 'Q',
+          'X', 'Arch', 'Arco', 'Broken', 'Arkam', 'RX'
       );
       
       $separador = array(
@@ -654,6 +779,10 @@ class generar_datos_prueba
       return $nombres[0].$separador[0].$nombres[1].' '.$tipo[0];
    }
    
+   /**
+    * Devuelve un email aleatorio.
+    * @return type
+    */
    private function email()
    {
       $nicks = array(
@@ -666,6 +795,10 @@ class generar_datos_prueba
       return $nicks[0].'.'.mt_rand(2, 9999).'@facturascripts.com';
    }
    
+   /**
+    * Devuelve una provincia aleatoria.
+    * @return string
+    */
    private function provincia()
    {
       $nombres = array(
@@ -677,6 +810,10 @@ class generar_datos_prueba
       return $nombres[0];
    }
    
+   /**
+    * Devuelve una ciudad aleatoria.
+    * @return string
+    */
    private function ciudad()
    {
       $nombres = array(
@@ -689,6 +826,10 @@ class generar_datos_prueba
       return $nombres[0];
    }
    
+   /**
+    * Devuelve una dirección aleatoria.
+    * @return type
+    */
    private function direccion()
    {
       $tipos = array(
@@ -712,12 +853,24 @@ class generar_datos_prueba
       }
    }
    
-   public function albaranescli()
+   /**
+    * Genera $max albaranes de venta aleatorios.
+    * Devuelve el número de albaranes generados.
+    * @param type $max
+    * @return int
+    */
+   public function albaranescli($max = 25)
    {
       $num = 0;
       $clientes = $this->random_clientes();
       
-      while($num < 25)
+      $recargo = FALSE;
+      if( $clientes[0]->recargo OR mt_rand(0, 4) == 0 )
+      {
+         $recargo = TRUE;
+      }
+      
+      while($num < $max)
       {
          $alb = new albaran_cliente();
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -771,29 +924,18 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = mt_rand(1, 10);
-               if( mt_rand(0, 3) == 0 )
-               {
-                  $numlineas = mt_rand(1, 200);
-               }
-               
+               $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_cliente();
                   $lin->idalbaran = $alb->idalbaran;
-                  
-                  $lin->cantidad = mt_rand(1, 3);
-                  if( mt_rand(0, 3) == 0 )
-                  {
-                     $lin->cantidad = mt_rand(1, 19);
-                  }
-                  
+                  $lin->cantidad = $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
-                  $lin->pvpunitario = round( mt_rand(1, 99)*0.3, FS_NF0_ART );
+                  $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
                   $lin->iva = $this->impuestos[0]->iva;
                   
-                  if( mt_rand(0, 9) == 0 )
+                  if( $recargo AND mt_rand(0, 2) == 0 )
                   {
                      $lin->recargo = $this->impuestos[0]->recargo;
                   }
@@ -823,7 +965,7 @@ class generar_datos_prueba
                   
                   if( mt_rand(0, 4) == 0 )
                   {
-                     $lin->dtopor = mt_rand(0, 99);
+                     $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
                   
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
@@ -864,12 +1006,24 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function albaranesprov()
+   /**
+    * Genera $max albaranes de compra aleatorios.
+    * Devuelve el número de albaranes generados.
+    * @param type $max
+    * @return int
+    */
+   public function albaranesprov($max = 25)
    {
       $num = 0;
       $proveedores = $this->random_proveedores();
       
-      while($num < 25)
+      $recargo = FALSE;
+      if( mt_rand(0, 4) == 0 )
+      {
+         $recargo = TRUE;
+      }
+      
+      while($num < $max)
       {
          $alb = new albaran_proveedor();
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -910,29 +1064,19 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = mt_rand(1, 10);
-               if( mt_rand(0, 3) == 0 )
-               {
-                  $numlineas = mt_rand(1, 200);
-               }
-               
+               $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_proveedor();
                   $lin->idalbaran = $alb->idalbaran;
                   
-                  $lin->cantidad = mt_rand(1, 3);
-                  if( mt_rand(0, 3) == 0 )
-                  {
-                     $lin->cantidad = mt_rand(1, 19);
-                  }
-                  
+                  $lin->cantidad = $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
-                  $lin->pvpunitario = round( mt_rand(1, 99)*0.3, FS_NF0_ART );
+                  $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
                   $lin->iva = $this->impuestos[0]->iva;
                   
-                  if( mt_rand(0, 9) == 0 )
+                  if( $recargo AND mt_rand(0, 2) == 0 )
                   {
                      $lin->recargo = $this->impuestos[0]->recargo;
                   }
@@ -962,7 +1106,7 @@ class generar_datos_prueba
                   
                   if( mt_rand(0, 4) == 0 )
                   {
-                     $lin->dtopor = mt_rand(0, 99);
+                     $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
                   
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
@@ -1003,12 +1147,24 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function pedidoscli()
+   /**
+    * Genera $max pedidos de venta aleatorios.
+    * Devuelve el número de pedidos generados.
+    * @param type $max
+    * @return int
+    */
+   public function pedidoscli($max = 25)
    {
       $num = 0;
       $clientes = $this->random_clientes();
       
-      while($num < 25)
+      $recargo = FALSE;
+      if( $clientes[0]->recargo OR mt_rand(0, 4) == 0 )
+      {
+         $recargo = TRUE;
+      }
+      
+      while($num < $max)
       {
          $ped = new pedido_cliente();
          $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -1067,29 +1223,18 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = mt_rand(1, 10);
-               if( mt_rand(0, 3) == 0 )
-               {
-                  $numlineas = mt_rand(1, 200);
-               }
-               
+               $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_pedido_cliente();
                   $lin->idpedido = $ped->idpedido;
-                  
-                  $lin->cantidad = mt_rand(1, 3);
-                  if( mt_rand(0, 3) == 0 )
-                  {
-                     $lin->cantidad = mt_rand(1, 19);
-                  }
-                  
+                  $lin->cantidad = $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
-                  $lin->pvpunitario = round( mt_rand(1, 99)*0.3, FS_NF0_ART );
+                  $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
                   $lin->iva = $this->impuestos[0]->iva;
                   
-                  if( mt_rand(0, 9) == 0 )
+                  if( $recargo AND mt_rand(0, 2) == 0 )
                   {
                      $lin->recargo = $this->impuestos[0]->recargo;
                   }
@@ -1119,7 +1264,7 @@ class generar_datos_prueba
                   
                   if( mt_rand(0, 4) == 0 )
                   {
-                     $lin->dtopor = mt_rand(0, 99);
+                     $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
                   
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
@@ -1160,12 +1305,24 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function pedidosprov()
+   /**
+    * Genera $max pedidos de compra aleatorios.
+    * Devuelve el número de pedidos generados.
+    * @param type $max
+    * @return int
+    */
+   public function pedidosprov($max = 25)
    {
       $num = 0;
       $proveedores = $this->random_proveedores();
       
-      while($num < 25)
+      $recargo = FALSE;
+      if( mt_rand(0, 4) == 0 )
+      {
+         $recargo = TRUE;
+      }
+      
+      while($num < $max)
       {
          $ped = new pedido_proveedor();
          $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -1206,29 +1363,18 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = mt_rand(1, 10);
-               if( mt_rand(0, 3) == 0 )
-               {
-                  $numlineas = mt_rand(1, 200);
-               }
-               
+               $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_pedido_proveedor();
                   $lin->idpedido = $ped->idpedido;
-                  
-                  $lin->cantidad = mt_rand(1, 3);
-                  if( mt_rand(0, 3) == 0 )
-                  {
-                     $lin->cantidad = mt_rand(1, 19);
-                  }
-                  
+                  $lin->cantidad = $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
-                  $lin->pvpunitario = round( mt_rand(1, 99)*0.3, FS_NF0_ART );
+                  $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
                   $lin->iva = $this->impuestos[0]->iva;
                   
-                  if( mt_rand(0, 9) == 0 )
+                  if( $recargo AND mt_rand(0, 2) == 0 )
                   {
                      $lin->recargo = $this->impuestos[0]->recargo;
                   }
@@ -1258,7 +1404,7 @@ class generar_datos_prueba
                   
                   if( mt_rand(0, 4) == 0 )
                   {
-                     $lin->dtopor = mt_rand(0, 99);
+                     $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
                   
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
@@ -1299,12 +1445,24 @@ class generar_datos_prueba
       return $num;
    }
    
-   public function presupuestoscli()
+   /**
+    * Genera $max presupuestos de venta aleatorios.
+    * Devuelve el número de presupuestos generados.
+    * @param type $max
+    * @return int
+    */
+   public function presupuestoscli($max = 25)
    {
       $num = 0;
       $clientes = $this->random_clientes();
       
-      while($num < 25)
+      $recargo = FALSE;
+      if( $clientes[0]->recargo OR mt_rand(0, 4) == 0 )
+      {
+         $recargo = TRUE;
+      }
+      
+      while($num < $max)
       {
          $presu = new presupuesto_cliente();
          $presu->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
@@ -1360,29 +1518,18 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = mt_rand(1, 10);
-               if( mt_rand(0, 3) == 0 )
-               {
-                  $numlineas = mt_rand(1, 200);
-               }
-               
+               $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_presupuesto_cliente();
                   $lin->idpresupuesto = $presu->idpresupuesto;
-                  
-                  $lin->cantidad = mt_rand(1, 3);
-                  if( mt_rand(0, 3) == 0 )
-                  {
-                     $lin->cantidad = mt_rand(1, 19);
-                  }
-                  
+                  $lin->cantidad = $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
-                  $lin->pvpunitario = round( mt_rand(1, 99)*0.3, FS_NF0_ART );
+                  $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
                   $lin->iva = $this->impuestos[0]->iva;
                   
-                  if( mt_rand(0, 9) == 0 )
+                  if( $recargo AND mt_rand(0, 2) == 0 )
                   {
                      $lin->recargo = $this->impuestos[0]->recargo;
                   }
@@ -1412,7 +1559,7 @@ class generar_datos_prueba
                   
                   if( mt_rand(0, 4) == 0 )
                   {
-                     $lin->dtopor = mt_rand(0, 99);
+                     $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
                   
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
@@ -1453,6 +1600,11 @@ class generar_datos_prueba
       return $num;
    }
    
+   /**
+    * Devuelve unas observaciones aleatorias.
+    * @param type $fecha
+    * @return string
+    */
    private function observaciones($fecha = FALSE)
    {
       $observaciones = array(
@@ -1460,6 +1612,16 @@ class generar_datos_prueba
           'Muy caro', 'Muy barato', 'Mala calidad',
           'La parte contratante de la primera parte será la parte contratante de la primera parte.'
       );
+      
+      /// añadimos muchos blas como otra opción
+      $bla = 'Bla';
+      while( mt_rand(0, 29) > 0 )
+      {
+         $bla .= ', bla';
+      }
+      $observaciones[] = $bla.'.';
+      
+      /// randomizamos (es posible que me haya inventado esta palabra)
       shuffle($observaciones);
       
       if($fecha AND mt_rand(0, 2) == 0)
