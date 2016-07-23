@@ -1842,6 +1842,8 @@ class generar_datos_prueba
          $serv->solucion = $this->observaciones($serv->fecha);
          $serv->fechainicio = Date('d-m-Y H:i',mt_rand(1356998400,1531353600));
          $serv->fechafin = date('Y-m-d H:i', strtotime($serv->fechainicio. '+ '.mt_rand(10, 59).' minutes'));   
+         $serv->idestado = mt_rand(1, 2);
+         $serv->garantia = rand(0,1) == 1;
 
 
          $eje = $this->ejercicio->get_by_fecha($serv->fecha);
