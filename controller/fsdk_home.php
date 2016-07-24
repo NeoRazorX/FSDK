@@ -178,6 +178,21 @@ class fsdk_home extends fs_controller
                   $this->new_error_msg('Instala el plugin facturacion_base.');
                }
                break;
+               
+            case 'servicioscli':
+               if( class_exists('servicio_cliente') )
+               {
+                  $num = $gdp->servicioscli();
+                  $this->new_message('Generados '.$num.' '.FS_SERVICIOS.' .');
+                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
+                  
+                  $this->url_recarga = $this->url().'&gdp=servicioscli';
+               }
+               else
+               {
+                  $this->new_error_msg('Instala el plugin servicios.');
+               }
+               break;
          }
       }
       else if( isset($_POST['generarplugin']) )
