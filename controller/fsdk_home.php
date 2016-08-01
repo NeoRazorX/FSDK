@@ -7,6 +7,11 @@
 
 require_once __DIR__.'/../lib/generar_datos_prueba.php';
 
+if( !defined('FS_SERVICIOS') )
+{
+   define('FS_SERVICIOS', 'servicios');
+}
+
 /**
  * Description of fsdk_home
  *
