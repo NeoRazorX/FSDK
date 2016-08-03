@@ -907,20 +907,29 @@ class generar_datos_prueba
             $alb->codcliente = $clientes[$num]->codcliente;
             $alb->nombrecliente = $clientes[$num]->razonsocial;
             $alb->cifnif = $clientes[$num]->cifnif;
-            foreach($clientes[$num]->get_direcciones() as $dir)
+            foreach ($clientes[$num]->get_direcciones() as $dir)
             {
-               $alb->codpais = $dir->codpais;
-               $alb->provincia = $dir->provincia;
-               $alb->ciudad = $dir->ciudad;
-               $alb->direccion = $dir->direccion;
-               $alb->codpostal = $dir->codpostal;
-               
-               if($dir->domfacturacion)
+               if ($dir->domfacturacion)
                {
-                  break;
+                  $alb->codpais = $dir->codpais;
+                  $alb->provincia = $dir->provincia;
+                  $alb->ciudad = $dir->ciudad;
+                  $alb->direccion = $dir->direccion;
+                  $alb->codpostal = $dir->codpostal;
+               }
+
+               if ($dir->domenvio)
+               {
+                  $alb->envio_nombre = $this->nombre();
+                  $alb->envio_apellidos = $this->apellidos();
+                  $alb->envio_provincia = $dir->provincia;
+                  $alb->envio_codpostal = $dir->codpostal;
+                  $alb->envio_ciudad = $dir->ciudad;
+                  $alb->envio_direccion = $dir->ciudad;
+                  $alb->envio_codigo = mt_rand(10, 99999);
                }
             }
-            
+
             if( $alb->save() )
             {
                $articulos = $this->random_articulos();
@@ -1206,20 +1215,29 @@ class generar_datos_prueba
             $ped->codcliente = $clientes[$num]->codcliente;
             $ped->nombrecliente = $clientes[$num]->razonsocial;
             $ped->cifnif = $clientes[$num]->cifnif;
-            foreach($clientes[$num]->get_direcciones() as $dir)
+            foreach ($clientes[$num]->get_direcciones() as $dir)
             {
-               $ped->codpais = $dir->codpais;
-               $ped->provincia = $dir->provincia;
-               $ped->ciudad = $dir->ciudad;
-               $ped->direccion = $dir->direccion;
-               $ped->codpostal = $dir->codpostal;
-               
-               if($dir->domenvio)
+               if ($dir->domenvio)
                {
-                  break;
+                  $ped->codpais = $dir->codpais;
+                  $ped->provincia = $dir->provincia;
+                  $ped->ciudad = $dir->ciudad;
+                  $ped->direccion = $dir->direccion;
+                  $ped->codpostal = $dir->codpostal;
+               }
+
+               if ($dir->domenvio)
+               {
+                  $ped->envio_nombre = $this->nombre();
+                  $ped->envio_apellidos = $this->apellidos();
+                  $ped->envio_provincia = $dir->provincia;
+                  $ped->envio_codpostal = $dir->codpostal;
+                  $ped->envio_ciudad = $dir->ciudad;
+                  $ped->envio_direccion = $dir->ciudad;
+                  $ped->envio_codigo = mt_rand(10, 99999);
                }
             }
-            
+
             if( $ped->save() )
             {
                $articulos = $this->random_articulos();
@@ -1503,15 +1521,23 @@ class generar_datos_prueba
             $presu->cifnif = $clientes[$num]->cifnif;
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
-               $presu->codpais = $dir->codpais;
-               $presu->provincia = $dir->provincia;
-               $presu->ciudad = $dir->ciudad;
-               $presu->direccion = $dir->direccion;
-               $presu->codpostal = $dir->codpostal;
-               
-               if($dir->domfacturacion)
+               if ($dir->domfacturacion)
                {
-                  break;
+                  $presu->codpais = $dir->codpais;
+                  $presu->provincia = $dir->provincia;
+                  $presu->ciudad = $dir->ciudad;
+                  $presu->direccion = $dir->direccion;
+                  $presu->codpostal = $dir->codpostal;
+               }
+               if($dir->domenvio)
+               {
+                  $presu->envio_nombre = $this->nombre();
+                  $presu->envio_apellidos = $this->apellidos();
+                  $presu->envio_provincia = $dir->provincia;
+                  $presu->envio_codpostal = $dir->codpostal;
+                  $presu->envio_ciudad = $dir->ciudad;
+                  $presu->envio_direccion = $dir->ciudad;
+                  $presu->envio_codigo = mt_rand(10, 99999);
                }
             }
             
