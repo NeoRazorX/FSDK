@@ -429,7 +429,7 @@ class generar_datos_prueba
          }
          
          $agente->dnicif = mt_rand(0, 99999999);
-         if( mt_rand(0, 14) == 0 )
+         if( mt_rand(0, 9) == 0 )
          {
             $agente->dnicif = '';
          }
@@ -439,6 +439,7 @@ class generar_datos_prueba
          $agente->provincia = $this->provincia();
          $agente->ciudad = $this->ciudad();
          $agente->direccion = $this->direccion();
+         $agente->codpostal = mt_rand(11111, 99999);
          
          if( mt_rand(0, 1) == 0 )
          {
@@ -448,6 +449,24 @@ class generar_datos_prueba
          if( mt_rand(0, 2) > 0 )
          {
             $agente->email = $this->email();
+         }
+         
+         if( mt_rand(0, 2) > 0 )
+         {
+            $cargos = array('Gerente','CEO','Compras','Comercial','Técnico','Freelance','Becario','Becario Senior');
+            shuffle($cargos);
+            $agente->cargo = $cargos[0];
+         }
+         
+         if( mt_rand(0, 1) == 0 )
+         {
+            $agente->seg_social = mt_rand(111111, 9999999999);
+         }
+         
+         if( mt_rand(0, 5) == 0 )
+         {
+            $agente->banco = 'ES'.mt_rand(10, 99).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '
+                    .mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999);
          }
          
          if( mt_rand(0, 5) == 0 )
@@ -556,6 +575,23 @@ class generar_datos_prueba
                $dir->ciudad = $this->ciudad();
                $dir->direccion = $this->direccion();
                $dir->codpostal = mt_rand(1234, 99999);
+               
+               if( mt_rand(0, 9) == 0 )
+               {
+                  $dir->apartado = mt_rand(1234, 99999);
+               }
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->domenvio = FALSE;
+               }
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->domfacturacion = FALSE;
+               }
+               
+               $dir->descripcion = 'Dirección #'.$num_dirs;
                $dir->save();
                $num_dirs--;
             }
@@ -583,7 +619,7 @@ class generar_datos_prueba
                
                if( mt_rand(0, 1) == 0 )
                {
-                  $cuenta->fmandato = $cliente->fechaalta;
+                  $cuenta->fmandato = date( 'd-m-Y', strtotime($cliente->fechaalta.' +'.mt_rand(1, 30).' days') );
                }
                
                $cuenta->save();
@@ -675,6 +711,18 @@ class generar_datos_prueba
                $dir->ciudad = $this->ciudad();
                $dir->direccion = $this->direccion();
                $dir->codpostal = mt_rand(1234, 99999);
+               
+               if( mt_rand(0, 9) == 0 )
+               {
+                  $dir->apartado = mt_rand(1234, 99999);
+               }
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->direccionppal = FALSE;
+               }
+               
+               $dir->descripcion = 'Dirección #'.$num_dirs;
                $dir->save();
                $num_dirs--;
             }
@@ -803,8 +851,12 @@ class generar_datos_prueba
    private function provincia()
    {
       $nombres = array(
-          'Alicante', 'Valencia', 'Andalucía', 'Madrid', 'Pichita',
-          'La meseta', 'Black mesa', 'Antioquía', 'Genérica', 'Medellín'
+          'A Coruña','Alava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona',
+          'Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','Cuenca',
+          'Girona','Granada','Guadalajara','Guipuzcoa','Huelva','Huesca','Jaen','León','Lleida','La Rioja',
+          'Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Las Palmas','Pontevedra',
+          'Salamanca','Segovia','Sevilla','Soria','Tarragona','Tenerife','Teruel','Toledo','Valencia',
+          'Valladolid','Vizcaya','Zamora','Zaragoza'
       );
       
       shuffle($nombres);
@@ -818,9 +870,12 @@ class generar_datos_prueba
    private function ciudad()
    {
       $nombres = array(
-          'Alicante', 'Valencia', 'Madrid', 'Elche', 'Torrevieja',
-          'Quito', 'Lima', 'Bejar', 'Medellín', 'Totoras', 'Ferrol',
-          'Labastida', 'Magaluf'
+          'A Coruña','Alava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona',
+          'Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','Cuenca',
+          'Girona','Granada','Guadalajara','Guipuzcoa','Huelva','Huesca','Jaen','León','Lleida','La Rioja',
+          'Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Las Palmas','Pontevedra',
+          'Salamanca','Segovia','Sevilla','Soria','Tarragona','Tenerife','Teruel','Toledo','Valencia',
+          'Valladolid','Vizcaya','Zamora','Zaragoza','Torrevieja','Elche'
       );
       
       shuffle($nombres);
@@ -907,26 +962,28 @@ class generar_datos_prueba
             $alb->codcliente = $clientes[$num]->codcliente;
             $alb->nombrecliente = $clientes[$num]->razonsocial;
             $alb->cifnif = $clientes[$num]->cifnif;
-            foreach ($clientes[$num]->get_direcciones() as $dir)
+            foreach($clientes[$num]->get_direcciones() as $dir)
             {
-               if ($dir->domfacturacion)
+               if($dir->domfacturacion)
                {
                   $alb->codpais = $dir->codpais;
                   $alb->provincia = $dir->provincia;
                   $alb->ciudad = $dir->ciudad;
                   $alb->direccion = $dir->direccion;
                   $alb->codpostal = $dir->codpostal;
+                  $alb->apartado = $dir->apartado;
                }
 
-               if ($dir->domenvio)
+               if($dir->domenvio AND mt_rand(0, 2) == 0)
                {
                   $alb->envio_nombre = $this->nombre();
                   $alb->envio_apellidos = $this->apellidos();
+                  $alb->envio_codpais = $dir->codpais;
                   $alb->envio_provincia = $dir->provincia;
-                  $alb->envio_codpostal = $dir->codpostal;
                   $alb->envio_ciudad = $dir->ciudad;
-                  $alb->envio_direccion = $dir->ciudad;
-                  $alb->envio_codigo = mt_rand(10, 99999);
+                  $alb->envio_codpostal = $dir->codpostal;
+                  $alb->envio_direccion = $dir->direccion;
+                  $alb->envio_apartado = $dir->apartado;
                }
             }
 
@@ -1215,26 +1272,27 @@ class generar_datos_prueba
             $ped->codcliente = $clientes[$num]->codcliente;
             $ped->nombrecliente = $clientes[$num]->razonsocial;
             $ped->cifnif = $clientes[$num]->cifnif;
-            foreach ($clientes[$num]->get_direcciones() as $dir)
+            foreach($clientes[$num]->get_direcciones() as $dir)
             {
-               if ($dir->domenvio)
+               if($dir->domenvio)
                {
                   $ped->codpais = $dir->codpais;
                   $ped->provincia = $dir->provincia;
                   $ped->ciudad = $dir->ciudad;
                   $ped->direccion = $dir->direccion;
                   $ped->codpostal = $dir->codpostal;
+                  $ped->apartado = $dir->apartado;
                }
 
-               if ($dir->domenvio)
+               if($dir->domenvio AND mt_rand(0, 2) == 0)
                {
                   $ped->envio_nombre = $this->nombre();
                   $ped->envio_apellidos = $this->apellidos();
+                  $ped->envio_codpais = $dir->codpais;
                   $ped->envio_provincia = $dir->provincia;
-                  $ped->envio_codpostal = $dir->codpostal;
                   $ped->envio_ciudad = $dir->ciudad;
-                  $ped->envio_direccion = $dir->ciudad;
-                  $ped->envio_codigo = mt_rand(10, 99999);
+                  $ped->envio_direccion = $dir->direccion;
+                  $ped->envio_apartado = $dir->apartado;
                }
             }
 
@@ -1521,23 +1579,26 @@ class generar_datos_prueba
             $presu->cifnif = $clientes[$num]->cifnif;
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
-               if ($dir->domfacturacion)
+               if($dir->domfacturacion)
                {
                   $presu->codpais = $dir->codpais;
                   $presu->provincia = $dir->provincia;
                   $presu->ciudad = $dir->ciudad;
                   $presu->direccion = $dir->direccion;
                   $presu->codpostal = $dir->codpostal;
+                  $presu->apartado = $dir->apartado;
                }
-               if($dir->domenvio)
+               
+               if($dir->domenvio AND mt_rand(0, 2) == 0)
                {
                   $presu->envio_nombre = $this->nombre();
                   $presu->envio_apellidos = $this->apellidos();
+                  $presu->envio_codpais = $dir->codpais;
                   $presu->envio_provincia = $dir->provincia;
-                  $presu->envio_codpostal = $dir->codpostal;
                   $presu->envio_ciudad = $dir->ciudad;
-                  $presu->envio_direccion = $dir->ciudad;
-                  $presu->envio_codigo = mt_rand(10, 99999);
+                  $presu->envio_codpostal = $dir->codpostal;
+                  $presu->envio_direccion = $dir->direccion;
+                  $presu->envio_apartado = $dir->apartado;
                }
             }
             
