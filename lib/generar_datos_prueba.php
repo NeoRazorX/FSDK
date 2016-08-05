@@ -576,17 +576,17 @@ class generar_datos_prueba
                $dir->direccion = $this->direccion();
                $dir->codpostal = mt_rand(1234, 99999);
                
-               if( mt_rand(0, 9) == 0 )
+               if( mt_rand(0, 3) == 0 )
                {
                   $dir->apartado = mt_rand(1234, 99999);
                }
                
-               if( mt_rand(0, 2) == 0 )
+               if( mt_rand(0, 1) == 0 )
                {
                   $dir->domenvio = FALSE;
                }
                
-               if( mt_rand(0, 2) == 0 )
+               if( mt_rand(0, 1) == 0 )
                {
                   $dir->domfacturacion = FALSE;
                }
@@ -649,6 +649,10 @@ class generar_datos_prueba
       {
          $proveedor = new proveedor();
          $proveedor->cifnif = mt_rand(0, 99999999);
+         if( mt_rand(0, 14) == 0 )
+         {
+            $proveedor->cifnif = '';
+         }
          
          $opcion = mt_rand(0, 4);
          $proveedor->nombre = $proveedor->razonsocial = $this->empresa();
@@ -712,12 +716,12 @@ class generar_datos_prueba
                $dir->direccion = $this->direccion();
                $dir->codpostal = mt_rand(1234, 99999);
                
-               if( mt_rand(0, 9) == 0 )
+               if( mt_rand(0, 3) == 0 )
                {
                   $dir->apartado = mt_rand(1234, 99999);
                }
                
-               if( mt_rand(0, 2) == 0 )
+               if( mt_rand(0, 1) == 0 )
                {
                   $dir->direccionppal = FALSE;
                }
