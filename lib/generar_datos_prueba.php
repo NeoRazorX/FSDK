@@ -963,9 +963,19 @@ class generar_datos_prueba
          {
             $alb->codejercicio = $eje->codejercicio;
             
-            $alb->codcliente = $clientes[$num]->codcliente;
-            $alb->nombrecliente = $clientes[$num]->razonsocial;
-            $alb->cifnif = $clientes[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $alb->codcliente = $clientes[$num]->codcliente;
+               $alb->nombrecliente = $clientes[$num]->razonsocial;
+               $alb->cifnif = $clientes[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez en cuando creamos uno sin cliente asociado para ver si todo peta ;-)
+               $alb->nombrecliente = $this->nombre().' '.$this->apellidos();
+               $alb->cifnif = mt_rand(1111, 999999999).'J';
+            }
+            
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
                if($dir->domfacturacion)
@@ -1127,9 +1137,18 @@ class generar_datos_prueba
          {
             $alb->codejercicio = $eje->codejercicio;
             
-            $alb->codproveedor = $proveedores[$num]->codproveedor;
-            $alb->nombre = $proveedores[$num]->razonsocial;
-            $alb->cifnif = $proveedores[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $alb->codproveedor = $proveedores[$num]->codproveedor;
+               $alb->nombre = $proveedores[$num]->razonsocial;
+               $alb->cifnif = $proveedores[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez en cuando generamos un sin proveedor, para ver si todo peta ;-)
+               $alb->nombre = $this->empresa();
+               $alb->cifnif = mt_rand(1111111, 9999999999).'Z';
+            }
             
             if( $alb->save() )
             {
@@ -1273,9 +1292,19 @@ class generar_datos_prueba
          {
             $ped->codejercicio = $eje->codejercicio;
             
-            $ped->codcliente = $clientes[$num]->codcliente;
-            $ped->nombrecliente = $clientes[$num]->razonsocial;
-            $ped->cifnif = $clientes[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $ped->codcliente = $clientes[$num]->codcliente;
+               $ped->nombrecliente = $clientes[$num]->razonsocial;
+               $ped->cifnif = $clientes[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez en cuando creamos uno sin cliente, por joder ;-)
+               $ped->nombrecliente = $this->nombre().' '.$this->apellidos();
+               $ped->cifnif = mt_rand(1, 99999999);
+            }
+            
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
                if($dir->domenvio)
@@ -1436,9 +1465,18 @@ class generar_datos_prueba
          {
             $ped->codejercicio = $eje->codejercicio;
             
-            $ped->codproveedor = $proveedores[$num]->codproveedor;
-            $ped->nombre = $proveedores[$num]->razonsocial;
-            $ped->cifnif = $proveedores[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $ped->codproveedor = $proveedores[$num]->codproveedor;
+               $ped->nombre = $proveedores[$num]->razonsocial;
+               $ped->cifnif = $proveedores[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez encuendo generamos un pedido son proveedor, para ver si peta todo ;-)
+               $ped->nombre = $this->nombre();
+               $ped->cifnif = mt_rand(111111, 999999999).'X';
+            }
             
             if( $ped->save() )
             {
@@ -1578,9 +1616,19 @@ class generar_datos_prueba
             
             $presu->finoferta = date('d-m-Y', strtotime($presu->fecha.' +'.mt_rand(1, 18).' months'));
             
-            $presu->codcliente = $clientes[$num]->codcliente;
-            $presu->nombrecliente = $clientes[$num]->razonsocial;
-            $presu->cifnif = $clientes[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $presu->codcliente = $clientes[$num]->codcliente;
+               $presu->nombrecliente = $clientes[$num]->razonsocial;
+               $presu->cifnif = $clientes[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez en cuando creamos uno sin cliente, por joder ;-)
+               $presu->nombrecliente = $this->empresa();
+               $presu->cifnif = '';
+            }
+            
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
                if($dir->domfacturacion)
@@ -1719,7 +1767,10 @@ class generar_datos_prueba
       if($fecha AND mt_rand(0, 2) == 0)
       {
          $semana = date("D", strtotime($fecha));
-         $semanaArray = array( "Mon" => "lunes", "Tue" => "martes", "Wed" => "miércoles", "Thu" => "jueves", "Fri" => "viernes", "Sat" => "sábado", "Sun" => "domingo", );
+         $semanaArray = array(
+             "Mon" => "lunes", "Tue" => "martes", "Wed" => "miércoles", "Thu" => "jueves",
+             "Fri" => "viernes", "Sat" => "sábado", "Sun" => "domingo",
+         );
          $title = urlencode(sprintf('{{Plantilla:Frase-%s}}', $semanaArray[$semana]));
          $sock = @fopen("http://es.wikiquote.org/w/api.php?action=parse&format=php&text=$title","r");
          if(!$sock)
@@ -1942,9 +1993,19 @@ class generar_datos_prueba
          {
             $serv->codejercicio = $eje->codejercicio;
             
-            $serv->codcliente = $clientes[$num]->codcliente;
-            $serv->nombrecliente = $clientes[$num]->razonsocial;
-            $serv->cifnif = $clientes[$num]->cifnif;
+            if( mt_rand(0, 14) > 0 )
+            {
+               $serv->codcliente = $clientes[$num]->codcliente;
+               $serv->nombrecliente = $clientes[$num]->razonsocial;
+               $serv->cifnif = $clientes[$num]->cifnif;
+            }
+            else
+            {
+               /// de vez en cuando creamos uno sin cliente asociado
+               $serv->nombrecliente = $this->empresa();
+               $serv->cifnif = '';
+            }
+            
             foreach($clientes[$num]->get_direcciones() as $dir)
             {
                $serv->codpais = $dir->codpais;
