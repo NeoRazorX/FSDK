@@ -936,9 +936,18 @@ class generar_datos_prueba
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $alb->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $alb->codalmacen = $this->empresa->codalmacen;
-         $alb->coddivisa = $this->empresa->coddivisa;
          $alb->codpago = $this->empresa->codpago;
          $alb->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $alb->coddivisa = $div->coddivisa;
+               $alb->tasaconv = $div->tasaconv;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
@@ -1110,9 +1119,18 @@ class generar_datos_prueba
          $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $alb->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $alb->codalmacen = $this->empresa->codalmacen;
-         $alb->coddivisa = $this->empresa->coddivisa;
          $alb->codpago = $this->empresa->codpago;
          $alb->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $alb->coddivisa = $div->coddivisa;
+               $alb->tasaconv = $div->tasaconv_compra;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
@@ -1260,9 +1278,18 @@ class generar_datos_prueba
          $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $ped->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $ped->codalmacen = $this->empresa->codalmacen;
-         $ped->coddivisa = $this->empresa->coddivisa;
          $ped->codpago = $this->empresa->codpago;
          $ped->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $ped->coddivisa = $div->coddivisa;
+               $ped->tasaconv = $div->tasaconv;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
@@ -1438,9 +1465,18 @@ class generar_datos_prueba
          $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $ped->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $ped->codalmacen = $this->empresa->codalmacen;
-         $ped->coddivisa = $this->empresa->coddivisa;
          $ped->codpago = $this->empresa->codpago;
          $ped->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $ped->coddivisa = $div->coddivisa;
+               $ped->tasaconv = $div->tasaconv_compra;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
@@ -1587,9 +1623,18 @@ class generar_datos_prueba
          $presu->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $presu->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $presu->codalmacen = $this->empresa->codalmacen;
-         $presu->coddivisa = $this->empresa->coddivisa;
          $presu->codpago = $this->empresa->codpago;
          $presu->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $presu->coddivisa = $div->coddivisa;
+               $presu->tasaconv = $div->tasaconv;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
@@ -1955,9 +2000,18 @@ class generar_datos_prueba
          $serv->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
          $serv->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $serv->codalmacen = $this->empresa->codalmacen;
-         $serv->coddivisa = $this->empresa->coddivisa;
          $serv->codpago = $this->empresa->codpago;
          $serv->codserie = $this->empresa->codserie;
+         
+         foreach($this->divisas as $div)
+         {
+            if($div->coddivisa == $this->empresa->coddivisa)
+            {
+               $serv->coddivisa = $div->coddivisa;
+               $serv->tasaconv = $div->tasaconv;
+               break;
+            }
+         }
          
          if( mt_rand(0, 2) == 0 )
          {
