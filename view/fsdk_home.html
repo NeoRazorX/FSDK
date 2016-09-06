@@ -93,7 +93,7 @@
 </div>
 
 <div class="modal fade" id="modal_datos_prueba" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
+   <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -109,7 +109,7 @@
          </div>
          <div class="modal-body">
             <div class="row">
-               <div class="col-sm-6">
+               <div class="col-sm-4">
                   <a href="{$fsc->url()}&gdp=fabricantes" class="btn btn-sm btn-block btn-default">
                      <i class="fa fa-folder" aria-hidden="true"></i> Fabricantes
                   </a>
@@ -122,6 +122,13 @@
                      <i class="fa fa-cubes" aria-hidden="true"></i> Artículos
                   </a>
                   <br/>
+                  <a href="{$fsc->url()}&gdp=agentes" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-users" aria-hidden="true"></i> Empleados
+                  </a>
+                  <br/>
+                  
+               </div>
+               <div class="col-sm-4">
                   <a href="{$fsc->url()}&gdp=proveedores" class="btn btn-sm btn-block btn-default">
                      <i class="fa fa-users" aria-hidden="true"></i> Proveedores
                   </a>
@@ -135,11 +142,7 @@
                   </a>
                   <br/>
                </div>
-               <div class="col-sm-6">
-                  <a href="{$fsc->url()}&gdp=agentes" class="btn btn-sm btn-block btn-default">
-                     <i class="fa fa-users" aria-hidden="true"></i> Empleados
-                  </a>
-                  <br/>
+               <div class="col-sm-4">
                   <a href="{$fsc->url()}&gdp=clientes" class="btn btn-sm btn-block btn-default">
                      <i class="fa fa-users" aria-hidden="true"></i> Clientes
                   </a>
