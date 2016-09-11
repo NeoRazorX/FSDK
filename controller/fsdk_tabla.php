@@ -38,7 +38,7 @@ class fsdk_tabla extends fs_controller
       }
       else
       {
-         $this->new_error_msg('Tabla desconocida.');
+         $this->new_error_msg('Tabla desconocida.', 'error', FALSE, FALSE);
       }
    }
    
