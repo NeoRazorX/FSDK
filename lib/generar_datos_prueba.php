@@ -338,7 +338,7 @@ class generar_datos_prueba
             break;
          
          case 1:
-            $texto .= ': '.$descripciones1[0].' con '.$descripciones2[0];
+            $texto .= ': '.$descripciones1[0].' con '.$descripciones2[0].'.';
             break;
          
          case 2:
@@ -1016,12 +1016,19 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
+               /// una de cada 15 veces usamos cantidades negativas
+               $modcantidad = 1;
+               if( mt_rand(0, 4) == 0 )
+               {
+                  $modcantidad = -1;
+               }
+               
                $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_cliente();
                   $lin->idalbaran = $alb->idalbaran;
-                  $lin->cantidad = $this->cantidad(1, 3, 19);
+                  $lin->cantidad = $modcantidad * $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
                   $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
@@ -1174,13 +1181,19 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
+               /// una de cada 15 veces usamos cantidades negativas
+               $modcantidad = 1;
+               if( mt_rand(0, 14) == 0 )
+               {
+                  $modcantidad = -1;
+               }
+               
                $numlineas = $this->cantidad(1, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_proveedor();
                   $lin->idalbaran = $alb->idalbaran;
-                  
-                  $lin->cantidad = $this->cantidad(1, 3, 19);
+                  $lin->cantidad = $modcantidad * $this->cantidad(1, 3, 19);
                   $lin->descripcion = $this->descripcion();
                   $lin->pvpunitario = $this->precio(1, 49, 699);
                   $lin->codimpuesto = $this->impuestos[0]->codimpuesto;
@@ -1332,6 +1345,11 @@ class generar_datos_prueba
                /// de vez en cuando creamos uno sin cliente, por joder ;-)
                $ped->nombrecliente = $this->nombre().' '.$this->apellidos();
                $ped->cifnif = mt_rand(1, 99999999);
+            }
+            
+            if( mt_rand(0, 3) == 0 )
+            {
+               $ped->fechasalida = date('d-m-Y', strtotime($ped->fecha.' +'.mt_rand(1, 3).' months'));
             }
             
             foreach($clientes[$num]->get_direcciones() as $dir)
