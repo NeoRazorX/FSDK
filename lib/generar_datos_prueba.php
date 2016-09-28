@@ -11,6 +11,7 @@ require_model('agente.php');
 require_model('almacen.php');
 require_model('articulo.php');
 require_model('cliente.php');
+require_model('crm_contacto.php');
 require_model('cuenta_banco_cliente.php');
 require_model('cuenta_banco_proveedor.php');
 require_model('divisa.php');
@@ -491,6 +492,73 @@ class generar_datos_prueba
    }
    
    /**
+    * Genera $max contactos aleatorios.
+    * Devuelve el número de contactos generados.
+    * @param type $max
+    * @return int
+    */
+   public function contactos($max = 50)
+   {
+      $num = 0;
+      
+      while($num < $max)
+      {
+         $contacto = new crm_contacto();
+         $contacto->fechaalta = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016) );
+         $contacto->nombre = $this->nombre().' '.$this->apellidos();
+         
+         $contacto->codpais = $this->empresa->codpais;
+         if( mt_rand(0, 2) == 0 )
+         {
+            $contacto->codpais = $this->paises[0]->codpais;
+         }
+         $contacto->provincia = $this->provincia();
+         $contacto->ciudad = $this->ciudad();
+         $contacto->direccion = $this->direccion();
+         $contacto->codpostal = mt_rand(11111, 99999);
+         
+         if( mt_rand(0, 1) == 0 )
+         {
+            $contacto->telefono1 = mt_rand(555555555, 999999999);
+         }
+         
+         if( mt_rand(0, 2) > 0 )
+         {
+            $contacto->email = $this->email();
+         }
+         
+         if( mt_rand(0, 2) > 0 )
+         {
+            $cargos = array('Gerente','CEO','Compras','Comercial','Técnico','Freelance','Becario','Becario Senior');
+            shuffle($cargos);
+            $contacto->cargo = $cargos[0];
+         }
+         
+         if( mt_rand(0, 1) == 0 )
+         {
+            $contacto->admitemarketing = FALSE;
+         }
+         
+         if( mt_rand(0, 2) > 0 )
+         {
+            shuffle($this->agentes);
+            $contacto->codagente = $this->agentes[0]->codagente;
+         }
+         
+         if( $contacto->save() )
+         {
+            $num++;
+         }
+         else
+         {
+            break;
+         }
+      }
+      
+      return $num;
+   }
+   
+   /**
     * Genera $max clientes aleatorios.
     * Devuelve el número de clientes generados.
     * @param type $max
@@ -553,6 +621,12 @@ class generar_datos_prueba
          if( mt_rand(0, 9) == 0 )
          {
             $cliente->regimeniva = 'Exento';
+         }
+         
+         if( mt_rand(0, 2) > 0 )
+         {
+            shuffle($this->agentes);
+            $cliente->codagente = $this->agentes[0]->codagente;
          }
          
          $cliente->codcliente = $cliente->get_new_codigo();
@@ -2048,24 +2122,24 @@ class generar_datos_prueba
             }
             
             $serv->observaciones = $this->observaciones($serv->fecha);
-
             $serv->numero2 = mt_rand(10, 99999);
          }
-         $serv->material = $this->observaciones($serv->fecha);
-         $serv->material_estado = $this->observaciones($serv->fecha);
-         $serv->accesorios = $this->observaciones($serv->fecha);
-         $serv->descripcion = $this->observaciones($serv->fecha);
-         $serv->solucion = $this->observaciones($serv->fecha);
-         $serv->fechainicio = Date('d-m-Y H:i',mt_rand(1356998400,1531353600));
-         $serv->fechafin = date('Y-m-d H:i', strtotime($serv->fechainicio. '+ '.mt_rand(10, 59).' minutes'));   
-         $serv->idestado = mt_rand(1, 2);
-         $serv->garantia = rand(0,1) == 1;
-
-
+         
+         $serv->material = $this->observaciones();
+         $serv->material_estado = $this->observaciones();
+         $serv->accesorios = $this->observaciones();
+         $serv->descripcion = $this->observaciones();
+         $serv->solucion = $this->observaciones();
+         
          $eje = $this->ejercicio->get_by_fecha($serv->fecha);
          if($eje)
          {
             $serv->codejercicio = $eje->codejercicio;
+            
+            $serv->fechainicio = Date('d-m-Y H:i', strtotime($serv->fecha.' +'.mt_rand(1, 18).' days'));
+            $serv->fechafin = date('Y-m-d H:i', strtotime($serv->fechainicio.' +'.mt_rand(10, 59).' minutes'));   
+            $serv->idestado = mt_rand(1, 2);
+            $serv->garantia = ( mt_rand(0, 1) == 1 );
             
             if( mt_rand(0, 14) > 0 )
             {
