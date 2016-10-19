@@ -126,10 +126,6 @@
                      <i class="fa fa-users" aria-hidden="true"></i> Empleados
                   </a>
                   <br/>
-                  <a href="{$fsc->url()}&gdp=contactos" class="btn btn-sm btn-block btn-default">
-                     <i class="fa fa-users" aria-hidden="true"></i> Contactos
-                  </a>
-                  <br/>
                </div>
                <div class="col-sm-4">
                   <a href="{$fsc->url()}&gdp=proveedores" class="btn btn-sm btn-block btn-default">
@@ -146,6 +142,10 @@
                   <br/>
                </div>
                <div class="col-sm-4">
+                  <a href="{$fsc->url()}&gdp=gruposcli" class="btn btn-sm btn-block btn-default">
+                     <i class="fa fa-folder" aria-hidden="true"></i> Grupos de clientes
+                  </a>
+                  <br/>
                   <a href="{$fsc->url()}&gdp=clientes" class="btn btn-sm btn-block btn-default">
                      <i class="fa fa-users" aria-hidden="true"></i> Clientes
                   </a>
@@ -167,6 +167,15 @@
                   </a>
                   <br/>
                </div>
+            </div>
+            <div class="row">
+            {loop="$fsc->extensions"}
+               {if="$value->type=='generate'"}
+               <div class="col-sm-4">
+                  <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-block btn-default">{$value->text}</a>
+               </div>
+               {/if}
+            {/loop}
             </div>
          </div>
       </div>

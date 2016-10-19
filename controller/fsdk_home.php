@@ -74,6 +74,14 @@ class fsdk_home extends fs_controller
                }
                break;
             
+            case 'gruposcli':
+               if( class_exists('cliente') )
+               {
+                  $num = $gdp->grupos_clientes();
+                  $this->new_message('Generados '.$num.' grupos de clientes.');
+               }
+               break;
+            
             case 'clientes':
                if( class_exists('cliente') )
                {
@@ -92,21 +100,6 @@ class fsdk_home extends fs_controller
             case 'agentes':
                $num = $gdp->agentes();
                $this->new_message('Generados '.$num.' empleados.');
-               break;
-            
-            case 'contactos':
-               if( class_exists('crm_contacto') )
-               {
-                  $num = $gdp->contactos();
-                  $this->new_message('Generados '.$num.' contactos.');
-                  $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
-                  
-                  $this->url_recarga = $this->url().'&gdp=contactos';
-               }
-               else
-               {
-                  $this->new_error_msg('Instala el plugin CRM.');
-               }
                break;
             
             case 'proveedores':

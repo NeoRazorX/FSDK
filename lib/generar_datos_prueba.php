@@ -19,6 +19,7 @@ require_model('ejercicio.php');
 require_model('familia.php');
 require_model('fabricante.php');
 require_model('forma_pago.php');
+require_model('grupo_clientes.php');
 require_model('impuesto.php');
 require_model('pais.php');
 require_model('pedido_cliente.php');
@@ -35,16 +36,18 @@ require_model('servicio_cliente.php');
  */
 class generar_datos_prueba
 {
-   private $agentes;
-   private $almacenes;
-   private $db;
-   private $divisas;
-   private $ejercicio;
-   private $empresa;
-   private $formas_pago;
-   private $impuestos;
-   private $paises;
-   private $series;
+   protected $agentes;
+   protected $almacenes;
+   protected $db;
+   protected $divisas;
+   protected $ejercicio;
+   protected $empresa;
+   protected $formas_pago;
+   protected $grupos;
+   protected $impuestos;
+   protected $paises;
+   protected $series;
+   protected $users;
    
    /**
     * Constructor. Inicializamos todo lo necesario, y randomizamos.
@@ -74,12 +77,16 @@ class generar_datos_prueba
       
       if( class_exists('impuesto') )
       {
+         $grupo = new grupo_clientes();
+         $this->grupos = $grupo->all();
+         
          $imp = new impuesto();
          $this->impuestos = $imp->all();
          shuffle($this->impuestos);
       }
       else
       {
+         $this->grupos = array();
          $this->impuestos = array();
       }
       
@@ -90,6 +97,9 @@ class generar_datos_prueba
       $serie = new serie();
       $this->series = $serie->all();
       shuffle($this->series);
+      
+      $user = new fs_user();
+      $this->users = $user->all();
    }
    
    /**
@@ -164,7 +174,7 @@ class generar_datos_prueba
     * @param type $len
     * @return type
     */
-   private function txt2codigo($txt, $len = 8)
+   protected function txt2codigo($txt, $len = 8)
    {
       $txt = str_replace( array(' ','-','_','&','ó',':'), array('','','','','O',''), strtoupper($txt));
       
@@ -296,7 +306,7 @@ class generar_datos_prueba
     * Devuelve una descripción de producto aleatoria.
     * @return string
     */
-   private function descripcion()
+   protected function descripcion()
    {
       $prefijos = array(
           'Jet', 'Jex', 'Max', 'Pro', 'FX', 'Neo', 'Maxi', 'Extreme', 'Sub',
@@ -367,7 +377,7 @@ class generar_datos_prueba
     * @param type $max2
     * @return type
     */
-   private function cantidad($min, $max1, $max2)
+   protected function cantidad($min, $max1, $max2)
    {
       $cantidad = mt_rand($min, $max1);
       
@@ -393,7 +403,7 @@ class generar_datos_prueba
     * @param type $max2
     * @return type
     */
-   private function precio($min, $max1, $max2)
+   protected function precio($min, $max1, $max2)
    {
       $precio = mt_rand($min, $max1);
       
@@ -492,60 +502,31 @@ class generar_datos_prueba
    }
    
    /**
-    * Genera $max contactos aleatorios.
-    * Devuelve el número de contactos generados.
+    * Genera $max grupos de clientes aleatorios.
+    * Devuelve el número de grupos de clientes generados.
     * @param type $max
     * @return int
     */
-   public function contactos($max = 50)
+   public function grupos_clientes($max = 50)
    {
       $num = 0;
       
+      $nombres = array(
+          'Profesionales', 'Profesional', 'Grandes compradores', 'Preferentes',
+          'Basico', 'Premium', 'Variado', 'Reservado', 'Técnico', 'Elemental',
+      );
+      $nombres2 = array(
+          'VIP', 'PRO', 'NEO', 'XL', 'XXL', '50 aniversario', 'C', 'Z'
+      );
+      
       while($num < $max)
       {
-         $contacto = new crm_contacto();
-         $contacto->fechaalta = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016) );
-         $contacto->nombre = $this->nombre().' '.$this->apellidos();
-         
-         $contacto->codpais = $this->empresa->codpais;
-         if( mt_rand(0, 2) == 0 )
-         {
-            $contacto->codpais = $this->paises[0]->codpais;
-         }
-         $contacto->provincia = $this->provincia();
-         $contacto->ciudad = $this->ciudad();
-         $contacto->direccion = $this->direccion();
-         $contacto->codpostal = mt_rand(11111, 99999);
-         
-         if( mt_rand(0, 1) == 0 )
-         {
-            $contacto->telefono1 = mt_rand(555555555, 999999999);
-         }
-         
-         if( mt_rand(0, 2) > 0 )
-         {
-            $contacto->email = $this->email();
-         }
-         
-         if( mt_rand(0, 2) > 0 )
-         {
-            $cargos = array('Gerente','CEO','Compras','Comercial','Técnico','Freelance','Becario','Becario Senior');
-            shuffle($cargos);
-            $contacto->cargo = $cargos[0];
-         }
-         
-         if( mt_rand(0, 1) == 0 )
-         {
-            $contacto->admitemarketing = FALSE;
-         }
-         
-         if( mt_rand(0, 2) > 0 )
-         {
-            shuffle($this->agentes);
-            $contacto->codagente = $this->agentes[0]->codagente;
-         }
-         
-         if( $contacto->save() )
+         shuffle($nombres);
+         shuffle($nombres2);
+         $grupo = new grupo_clientes();
+         $grupo->nombre = $nombres[0].' '.$nombres2[0].' '.$num;
+         $grupo->codgrupo = $grupo->get_new_codigo();
+         if( $grupo->save() )
          {
             $num++;
          }
@@ -627,6 +608,12 @@ class generar_datos_prueba
          {
             shuffle($this->agentes);
             $cliente->codagente = $this->agentes[0]->codagente;
+         }
+         
+         if( mt_rand(0, 2) > 0 AND $this->grupos )
+         {
+            shuffle($this->grupos);
+            $cliente->codgrupo = $this->grupos[0]->codgrupo;
          }
          
          $cliente->codcliente = $cliente->get_new_codigo();
@@ -845,7 +832,7 @@ class generar_datos_prueba
     * Devuelve un nombre aleatorio.
     * @return string
     */
-   private function nombre()
+   protected function nombre()
    {
       $nombres = array(
           'Carlos', 'Pepe', 'Wilson', 'Petra', 'Madonna', 'Justin',
@@ -864,7 +851,7 @@ class generar_datos_prueba
     * Devuelve dos apellidos aleatorios.
     * @return type
     */
-   private function apellidos()
+   protected function apellidos()
    {
       $apellidos = array(
           'García', 'Gómez', 'Ronaldo', 'Suarez', 'Wilson', 'Pacheco',
@@ -882,7 +869,7 @@ class generar_datos_prueba
     * Devuelve un nombre comercial aleatorio.
     * @return type
     */
-   private function empresa()
+   protected function empresa()
    {
       $nombres = array(
           'Tech', 'Motor', 'Pasión', 'Future', 'Max', 'Massive', 'Industrial',
@@ -912,7 +899,7 @@ class generar_datos_prueba
     * Devuelve un email aleatorio.
     * @return type
     */
-   private function email()
+   protected function email()
    {
       $nicks = array(
           'neo', 'carlos', 'moko', 'snake', 'pikachu', 'pliskin', 'ocelot', 'samurai',
@@ -928,7 +915,7 @@ class generar_datos_prueba
     * Devuelve una provincia aleatoria.
     * @return string
     */
-   private function provincia()
+   protected function provincia()
    {
       $nombres = array(
           'A Coruña','Alava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona',
@@ -947,7 +934,7 @@ class generar_datos_prueba
     * Devuelve una ciudad aleatoria.
     * @return string
     */
-   private function ciudad()
+   protected function ciudad()
    {
       $nombres = array(
           'A Coruña','Alava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona',
@@ -966,7 +953,7 @@ class generar_datos_prueba
     * Devuelve una dirección aleatoria.
     * @return type
     */
-   private function direccion()
+   protected function direccion()
    {
       $tipos = array(
           'Calle', 'Avenida', 'Polígono', 'Carretera'
@@ -1048,11 +1035,38 @@ class generar_datos_prueba
          {
             $alb->codejercicio = $eje->codejercicio;
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($clientes[$num]) )
             {
                $alb->codcliente = $clientes[$num]->codcliente;
                $alb->nombrecliente = $clientes[$num]->razonsocial;
                $alb->cifnif = $clientes[$num]->cifnif;
+               $regimeniva = $clientes[$num]->regimeniva;
+               
+               foreach($clientes[$num]->get_direcciones() as $dir)
+               {
+                  if($dir->domfacturacion)
+                  {
+                     $alb->codpais = $dir->codpais;
+                     $alb->provincia = $dir->provincia;
+                     $alb->ciudad = $dir->ciudad;
+                     $alb->direccion = $dir->direccion;
+                     $alb->codpostal = $dir->codpostal;
+                     $alb->apartado = $dir->apartado;
+                  }
+                  
+                  if($dir->domenvio AND mt_rand(0, 2) == 0)
+                  {
+                     $alb->envio_nombre = $this->nombre();
+                     $alb->envio_apellidos = $this->apellidos();
+                     $alb->envio_codpais = $dir->codpais;
+                     $alb->envio_provincia = $dir->provincia;
+                     $alb->envio_ciudad = $dir->ciudad;
+                     $alb->envio_codpostal = $dir->codpostal;
+                     $alb->envio_direccion = $dir->direccion;
+                     $alb->envio_apartado = $dir->apartado;
+                  }
+               }
             }
             else
             {
@@ -1061,31 +1075,6 @@ class generar_datos_prueba
                $alb->cifnif = mt_rand(1111, 999999999).'J';
             }
             
-            foreach($clientes[$num]->get_direcciones() as $dir)
-            {
-               if($dir->domfacturacion)
-               {
-                  $alb->codpais = $dir->codpais;
-                  $alb->provincia = $dir->provincia;
-                  $alb->ciudad = $dir->ciudad;
-                  $alb->direccion = $dir->direccion;
-                  $alb->codpostal = $dir->codpostal;
-                  $alb->apartado = $dir->apartado;
-               }
-
-               if($dir->domenvio AND mt_rand(0, 2) == 0)
-               {
-                  $alb->envio_nombre = $this->nombre();
-                  $alb->envio_apellidos = $this->apellidos();
-                  $alb->envio_codpais = $dir->codpais;
-                  $alb->envio_provincia = $dir->provincia;
-                  $alb->envio_ciudad = $dir->ciudad;
-                  $alb->envio_codpostal = $dir->codpostal;
-                  $alb->envio_direccion = $dir->direccion;
-                  $alb->envio_apartado = $dir->apartado;
-               }
-            }
-
             if( $alb->save() )
             {
                $articulos = $this->random_articulos();
@@ -1128,7 +1117,8 @@ class generar_datos_prueba
                   
                   $lin->irpf = $alb->irpf;
                   
-                  if($clientes[$num]->regimeniva == 'Exento')
+                  
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -1238,11 +1228,13 @@ class generar_datos_prueba
          {
             $alb->codejercicio = $eje->codejercicio;
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($proveedores[$num]) )
             {
                $alb->codproveedor = $proveedores[$num]->codproveedor;
                $alb->nombre = $proveedores[$num]->razonsocial;
                $alb->cifnif = $proveedores[$num]->cifnif;
+               $regimeniva = $proveedores[$num]->regimeniva;
             }
             else
             {
@@ -1293,7 +1285,7 @@ class generar_datos_prueba
                   
                   $lin->irpf = $alb->irpf;
                   
-                  if($proveedores[$num]->regimeniva == 'Exento')
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -1408,11 +1400,37 @@ class generar_datos_prueba
          {
             $ped->codejercicio = $eje->codejercicio;
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($clientes[$num]) )
             {
                $ped->codcliente = $clientes[$num]->codcliente;
                $ped->nombrecliente = $clientes[$num]->razonsocial;
                $ped->cifnif = $clientes[$num]->cifnif;
+               $regimeniva = $clientes[$num]->regimeniva;
+               
+               foreach($clientes[$num]->get_direcciones() as $dir)
+               {
+                  if($dir->domfacturacion)
+                  {
+                     $ped->codpais = $dir->codpais;
+                     $ped->provincia = $dir->provincia;
+                     $ped->ciudad = $dir->ciudad;
+                     $ped->direccion = $dir->direccion;
+                     $ped->codpostal = $dir->codpostal;
+                     $ped->apartado = $dir->apartado;
+                  }
+                  
+                  if($dir->domenvio AND mt_rand(0, 2) == 0)
+                  {
+                     $ped->envio_nombre = $this->nombre();
+                     $ped->envio_apellidos = $this->apellidos();
+                     $ped->envio_codpais = $dir->codpais;
+                     $ped->envio_provincia = $dir->provincia;
+                     $ped->envio_ciudad = $dir->ciudad;
+                     $ped->envio_direccion = $dir->direccion;
+                     $ped->envio_apartado = $dir->apartado;
+                  }
+               }
             }
             else
             {
@@ -1426,30 +1444,6 @@ class generar_datos_prueba
                $ped->fechasalida = date('d-m-Y', strtotime($ped->fecha.' +'.mt_rand(1, 3).' months'));
             }
             
-            foreach($clientes[$num]->get_direcciones() as $dir)
-            {
-               if($dir->domenvio)
-               {
-                  $ped->codpais = $dir->codpais;
-                  $ped->provincia = $dir->provincia;
-                  $ped->ciudad = $dir->ciudad;
-                  $ped->direccion = $dir->direccion;
-                  $ped->codpostal = $dir->codpostal;
-                  $ped->apartado = $dir->apartado;
-               }
-
-               if($dir->domenvio AND mt_rand(0, 2) == 0)
-               {
-                  $ped->envio_nombre = $this->nombre();
-                  $ped->envio_apellidos = $this->apellidos();
-                  $ped->envio_codpais = $dir->codpais;
-                  $ped->envio_provincia = $dir->provincia;
-                  $ped->envio_ciudad = $dir->ciudad;
-                  $ped->envio_direccion = $dir->direccion;
-                  $ped->envio_apartado = $dir->apartado;
-               }
-            }
-
             if( $ped->save() )
             {
                $articulos = $this->random_articulos();
@@ -1485,7 +1479,7 @@ class generar_datos_prueba
                   
                   $lin->irpf = $ped->irpf;
                   
-                  if($clientes[$num]->regimeniva == 'Exento')
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -1595,11 +1589,13 @@ class generar_datos_prueba
          {
             $ped->codejercicio = $eje->codejercicio;
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($proveedores[$num]) )
             {
                $ped->codproveedor = $proveedores[$num]->codproveedor;
                $ped->nombre = $proveedores[$num]->razonsocial;
                $ped->cifnif = $proveedores[$num]->cifnif;
+               $regimeniva = $proveedores[$num]->regimeniva;
             }
             else
             {
@@ -1643,7 +1639,7 @@ class generar_datos_prueba
                   
                   $lin->irpf = $ped->irpf;
                   
-                  if($proveedores[$num]->regimeniva == 'Exento')
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -1752,45 +1748,46 @@ class generar_datos_prueba
          if($eje)
          {
             $presu->codejercicio = $eje->codejercicio;
-            
             $presu->finoferta = date('d-m-Y', strtotime($presu->fecha.' +'.mt_rand(1, 18).' months'));
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($clientes[$num]) )
             {
                $presu->codcliente = $clientes[$num]->codcliente;
                $presu->nombrecliente = $clientes[$num]->razonsocial;
                $presu->cifnif = $clientes[$num]->cifnif;
+               $regimeniva = $clientes[$num]->regimeniva;
+               
+               foreach($clientes[$num]->get_direcciones() as $dir)
+               {
+                  if($dir->domfacturacion)
+                  {
+                     $presu->codpais = $dir->codpais;
+                     $presu->provincia = $dir->provincia;
+                     $presu->ciudad = $dir->ciudad;
+                     $presu->direccion = $dir->direccion;
+                     $presu->codpostal = $dir->codpostal;
+                     $presu->apartado = $dir->apartado;
+                  }
+                  
+                  if($dir->domenvio AND mt_rand(0, 2) == 0)
+                  {
+                     $presu->envio_nombre = $this->nombre();
+                     $presu->envio_apellidos = $this->apellidos();
+                     $presu->envio_codpais = $dir->codpais;
+                     $presu->envio_provincia = $dir->provincia;
+                     $presu->envio_ciudad = $dir->ciudad;
+                     $presu->envio_codpostal = $dir->codpostal;
+                     $presu->envio_direccion = $dir->direccion;
+                     $presu->envio_apartado = $dir->apartado;
+                  }
+               }
             }
             else
             {
                /// de vez en cuando creamos uno sin cliente, por joder ;-)
                $presu->nombrecliente = $this->empresa();
                $presu->cifnif = '';
-            }
-            
-            foreach($clientes[$num]->get_direcciones() as $dir)
-            {
-               if($dir->domfacturacion)
-               {
-                  $presu->codpais = $dir->codpais;
-                  $presu->provincia = $dir->provincia;
-                  $presu->ciudad = $dir->ciudad;
-                  $presu->direccion = $dir->direccion;
-                  $presu->codpostal = $dir->codpostal;
-                  $presu->apartado = $dir->apartado;
-               }
-               
-               if($dir->domenvio AND mt_rand(0, 2) == 0)
-               {
-                  $presu->envio_nombre = $this->nombre();
-                  $presu->envio_apellidos = $this->apellidos();
-                  $presu->envio_codpais = $dir->codpais;
-                  $presu->envio_provincia = $dir->provincia;
-                  $presu->envio_ciudad = $dir->ciudad;
-                  $presu->envio_codpostal = $dir->codpostal;
-                  $presu->envio_direccion = $dir->direccion;
-                  $presu->envio_apartado = $dir->apartado;
-               }
             }
             
             if( $presu->save() )
@@ -1828,7 +1825,7 @@ class generar_datos_prueba
                   
                   $lin->irpf = $presu->irpf;
                   
-                  if($clientes[$num]->regimeniva == 'Exento')
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -1877,198 +1874,6 @@ class generar_datos_prueba
       }
       
       return $num;
-   }
-   
-   /**
-    * Devuelve unas observaciones aleatorias.
-    * @param type $fecha
-    * @return string
-    */
-   private function observaciones($fecha = FALSE)
-   {
-      $observaciones = array(
-          'Pagado', 'Faltan piezas', 'No se corresponde con lo solicitado.',
-          'Muy caro', 'Muy barato', 'Mala calidad',
-          'La parte contratante de la primera parte será la parte contratante de la primera parte.'
-      );
-      
-      /// añadimos muchos blas como otra opción
-      $bla = 'Bla';
-      while( mt_rand(0, 29) > 0 )
-      {
-         $bla .= ', bla';
-      }
-      $observaciones[] = $bla.'.';
-      
-      /// randomizamos (es posible que me haya inventado esta palabra)
-      shuffle($observaciones);
-      
-      if($fecha AND mt_rand(0, 2) == 0)
-      {
-         $semana = date("D", strtotime($fecha));
-         $semanaArray = array(
-             "Mon" => "lunes", "Tue" => "martes", "Wed" => "miércoles", "Thu" => "jueves",
-             "Fri" => "viernes", "Sat" => "sábado", "Sun" => "domingo",
-         );
-         $title = urlencode(sprintf('{{Plantilla:Frase-%s}}', $semanaArray[$semana]));
-         $sock = @fopen("http://es.wikiquote.org/w/api.php?action=parse&format=php&text=$title","r");
-         if(!$sock)
-         {
-            return $observaciones[0];
-         }
-         else
-         {
-            # Hacemos la peticion al servidor
-            $array__ = unserialize(stream_get_contents($sock));
-            $texto_final = strip_tags($array__["parse"]["text"]["*"]);
-            $texto_final = str_replace("\n\n\n\n", "\n" ,$texto_final);
-            
-            return $texto_final;
-         }
-      }
-      else
-      {
-         return $observaciones[0];
-      }
-   }
-   
-   /**
-    * Devuelve un string aleatorio de longitud $length
-    * @param type $length la longitud del string
-    * @return type la cadena aleatoria
-    */
-   private function random_string($length = 30)
-   {
-      return mb_substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-              0, $length);
-   }
-   
-   /**
-    * Devuelve un array con clientes aleatorios.
-    * @param type $recursivo
-    * @return \cliente
-    */
-   private function random_clientes($recursivo = TRUE)
-   {
-      $lista = array();
-      
-      $sql = "SELECT * FROM clientes ORDER BY random()";
-      if( strtolower(FS_DB_TYPE) == 'mysql' )
-      {
-         $sql = "SELECT * FROM clientes ORDER BY RAND()";
-      }
-      
-      $data = $this->db->select_limit($sql, 100, 0);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $lista[] = new cliente($d);
-         }
-      }
-      else if($recursivo)
-      {
-         $this->clientes();
-         $lista = $this->random_clientes(FALSE);
-      }
-      
-      return $lista;
-   }
-   
-   /**
-    * Devuelve un array con proveedores aleatorios.
-    * @param type $recursivo
-    * @return \proveedor
-    */
-   private function random_proveedores($recursivo = TRUE)
-   {
-      $lista = array();
-      
-      $sql = "SELECT * FROM proveedores ORDER BY random()";
-      if( strtolower(FS_DB_TYPE) == 'mysql' )
-      {
-         $sql = "SELECT * FROM proveedores ORDER BY RAND()";
-      }
-      
-      $data = $this->db->select_limit($sql, 100, 0);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $lista[] = new proveedor($d);
-         }
-      }
-      else if($recursivo)
-      {
-         $this->proveedores();
-         return $this->random_proveedores(FALSE);
-      }
-      
-      return $lista;
-   }
-   
-   /**
-    * Devuelve un array con empleados aleatorios.
-    * @param type $recursivo
-    * @return \agente
-    */
-   private function random_agentes($recursivo = TRUE)
-   {
-      $lista = array();
-      
-      $sql = "SELECT * FROM agentes ORDER BY random()";
-      if( strtolower(FS_DB_TYPE) == 'mysql' )
-      {
-         $sql = "SELECT * FROM agentes ORDER BY RAND()";
-      }
-      
-      $data = $this->db->select_limit($sql, 100, 0);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $lista[] = new agente($d);
-         }
-      }
-      else if($recursivo)
-      {
-         $this->agentes();
-         return $this->random_agentes(FALSE);
-      }
-      
-      return $lista;
-   }
-   
-   /**
-    * Devuelve un array con artículos aleatorios.
-    * @param type $recursivo
-    * @return \articulo
-    */
-   private function random_articulos($recursivo = TRUE)
-   {
-      $lista = array();
-      
-      $sql = "SELECT * FROM articulos ORDER BY random()";
-      if( strtolower(FS_DB_TYPE) == 'mysql' )
-      {
-         $sql = "SELECT * FROM articulos ORDER BY RAND()";
-      }
-      
-      $data = $this->db->select_limit($sql, 100, 0);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $lista[] = new articulo($d);
-         }
-      }
-      else if($recursivo)
-      {
-         $this->articulos();
-         return $this->random_articulos(FALSE);
-      }
-      
-      return $lista;
    }
    
    /**
@@ -2141,31 +1946,32 @@ class generar_datos_prueba
             $serv->idestado = mt_rand(1, 2);
             $serv->garantia = ( mt_rand(0, 1) == 1 );
             
-            if( mt_rand(0, 14) > 0 )
+            $regimeniva = 'Exento';
+            if( mt_rand(0, 14) > 0 AND isset($clientes[$num]) )
             {
                $serv->codcliente = $clientes[$num]->codcliente;
                $serv->nombrecliente = $clientes[$num]->razonsocial;
                $serv->cifnif = $clientes[$num]->cifnif;
+               $regimeniva = $clientes[$num]->regimeniva;
+               
+               foreach($clientes[$num]->get_direcciones() as $dir)
+               {
+                  $serv->codpais = $dir->codpais;
+                  $serv->provincia = $dir->provincia;
+                  $serv->ciudad = $dir->ciudad;
+                  $serv->direccion = $dir->direccion;
+                  $serv->codpostal = $dir->codpostal;
+                  if($dir->domfacturacion)
+                  {
+                     break;
+                  }
+               }
             }
             else
             {
                /// de vez en cuando creamos uno sin cliente asociado
                $serv->nombrecliente = $this->empresa();
                $serv->cifnif = '';
-            }
-            
-            foreach($clientes[$num]->get_direcciones() as $dir)
-            {
-               $serv->codpais = $dir->codpais;
-               $serv->provincia = $dir->provincia;
-               $serv->ciudad = $dir->ciudad;
-               $serv->direccion = $dir->direccion;
-               $serv->codpostal = $dir->codpostal;
-               
-               if($dir->domfacturacion)
-               {
-                  break;
-               }
             }
             
             if( $serv->save() )
@@ -2203,7 +2009,7 @@ class generar_datos_prueba
                   
                   $lin->irpf = $serv->irpf;
                   
-                  if($clientes[$num]->regimeniva == 'Exento')
+                  if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
                      $lin->iva = 0;
@@ -2252,5 +2058,197 @@ class generar_datos_prueba
       }
       
       return $num;
+   }
+   
+   /**
+    * Devuelve unas observaciones aleatorias.
+    * @param type $fecha
+    * @return string
+    */
+   protected function observaciones($fecha = FALSE)
+   {
+      $observaciones = array(
+          'Pagado', 'Faltan piezas', 'No se corresponde con lo solicitado.',
+          'Muy caro', 'Muy barato', 'Mala calidad',
+          'La parte contratante de la primera parte será la parte contratante de la primera parte.'
+      );
+      
+      /// añadimos muchos blas como otra opción
+      $bla = 'Bla';
+      while( mt_rand(0, 29) > 0 )
+      {
+         $bla .= ', bla';
+      }
+      $observaciones[] = $bla.'.';
+      
+      /// randomizamos (es posible que me haya inventado esta palabra)
+      shuffle($observaciones);
+      
+      if($fecha AND mt_rand(0, 2) == 0)
+      {
+         $semana = date("D", strtotime($fecha));
+         $semanaArray = array(
+             "Mon" => "lunes", "Tue" => "martes", "Wed" => "miércoles", "Thu" => "jueves",
+             "Fri" => "viernes", "Sat" => "sábado", "Sun" => "domingo",
+         );
+         $title = urlencode(sprintf('{{Plantilla:Frase-%s}}', $semanaArray[$semana]));
+         $sock = @fopen("http://es.wikiquote.org/w/api.php?action=parse&format=php&text=$title","r");
+         if(!$sock)
+         {
+            return $observaciones[0];
+         }
+         else
+         {
+            # Hacemos la peticion al servidor
+            $array__ = unserialize(stream_get_contents($sock));
+            $texto_final = strip_tags($array__["parse"]["text"]["*"]);
+            $texto_final = str_replace("\n\n\n\n", "\n" ,$texto_final);
+            
+            return $texto_final;
+         }
+      }
+      else
+      {
+         return $observaciones[0];
+      }
+   }
+   
+   /**
+    * Devuelve un string aleatorio de longitud $length
+    * @param type $length la longitud del string
+    * @return type la cadena aleatoria
+    */
+   protected function random_string($length = 30)
+   {
+      return mb_substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+              0, $length);
+   }
+   
+   /**
+    * Devuelve un array con clientes aleatorios.
+    * @param type $recursivo
+    * @return \cliente
+    */
+   protected function random_clientes($recursivo = TRUE)
+   {
+      $lista = array();
+      
+      $sql = "SELECT * FROM clientes ORDER BY random()";
+      if( strtolower(FS_DB_TYPE) == 'mysql' )
+      {
+         $sql = "SELECT * FROM clientes ORDER BY RAND()";
+      }
+      
+      $data = $this->db->select_limit($sql, 100, 0);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $lista[] = new cliente($d);
+         }
+      }
+      else if($recursivo)
+      {
+         $this->clientes();
+         $lista = $this->random_clientes(FALSE);
+      }
+      
+      return $lista;
+   }
+   
+   /**
+    * Devuelve un array con proveedores aleatorios.
+    * @param type $recursivo
+    * @return \proveedor
+    */
+   protected function random_proveedores($recursivo = TRUE)
+   {
+      $lista = array();
+      
+      $sql = "SELECT * FROM proveedores ORDER BY random()";
+      if( strtolower(FS_DB_TYPE) == 'mysql' )
+      {
+         $sql = "SELECT * FROM proveedores ORDER BY RAND()";
+      }
+      
+      $data = $this->db->select_limit($sql, 100, 0);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $lista[] = new proveedor($d);
+         }
+      }
+      else if($recursivo)
+      {
+         $this->proveedores();
+         return $this->random_proveedores(FALSE);
+      }
+      
+      return $lista;
+   }
+   
+   /**
+    * Devuelve un array con empleados aleatorios.
+    * @param type $recursivo
+    * @return \agente
+    */
+   protected function random_agentes($recursivo = TRUE)
+   {
+      $lista = array();
+      
+      $sql = "SELECT * FROM agentes ORDER BY random()";
+      if( strtolower(FS_DB_TYPE) == 'mysql' )
+      {
+         $sql = "SELECT * FROM agentes ORDER BY RAND()";
+      }
+      
+      $data = $this->db->select_limit($sql, 100, 0);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $lista[] = new agente($d);
+         }
+      }
+      else if($recursivo)
+      {
+         $this->agentes();
+         return $this->random_agentes(FALSE);
+      }
+      
+      return $lista;
+   }
+   
+   /**
+    * Devuelve un array con artículos aleatorios.
+    * @param type $recursivo
+    * @return \articulo
+    */
+   protected function random_articulos($recursivo = TRUE)
+   {
+      $lista = array();
+      
+      $sql = "SELECT * FROM articulos ORDER BY random()";
+      if( strtolower(FS_DB_TYPE) == 'mysql' )
+      {
+         $sql = "SELECT * FROM articulos ORDER BY RAND()";
+      }
+      
+      $data = $this->db->select_limit($sql, 100, 0);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $lista[] = new articulo($d);
+         }
+      }
+      else if($recursivo)
+      {
+         $this->articulos();
+         return $this->random_articulos(FALSE);
+      }
+      
+      return $lista;
    }
 }
