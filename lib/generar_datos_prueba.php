@@ -1940,11 +1940,11 @@ class generar_datos_prueba
          if($eje)
          {
             $serv->codejercicio = $eje->codejercicio;
-            
             $serv->fechainicio = Date('d-m-Y H:i', strtotime($serv->fecha.' +'.mt_rand(1, 18).' days'));
             $serv->fechafin = date('Y-m-d H:i', strtotime($serv->fechainicio.' +'.mt_rand(10, 59).' minutes'));   
             $serv->idestado = mt_rand(1, 2);
             $serv->garantia = ( mt_rand(0, 1) == 1 );
+            $serv->prioridad = mt_rand(1, 4);
             
             $regimeniva = 'Exento';
             if( mt_rand(0, 14) > 0 AND isset($clientes[$num]) )
