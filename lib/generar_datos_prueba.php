@@ -1086,7 +1086,7 @@ class generar_datos_prueba
                   $modcantidad = -1;
                }
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_cliente();
@@ -1254,7 +1254,7 @@ class generar_datos_prueba
                   $modcantidad = -1;
                }
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_proveedor();
@@ -1448,7 +1448,7 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_pedido_cliente();
@@ -1608,7 +1608,7 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_pedido_proveedor();
@@ -1794,7 +1794,7 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_presupuesto_cliente();
@@ -1978,7 +1978,7 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = $this->cantidad(1, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 200);
                while($numlineas > 0)
                {
                   $lin = new linea_servicio_cliente();
