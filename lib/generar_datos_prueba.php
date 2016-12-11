@@ -16,6 +16,7 @@ require_model('cuenta_banco_cliente.php');
 require_model('cuenta_banco_proveedor.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
+require_model('estado_servicio.php');
 require_model('familia.php');
 require_model('fabricante.php');
 require_model('forma_pago.php');
@@ -1898,6 +1899,10 @@ class generar_datos_prueba
       $num = 0;
       $clientes = $this->random_clientes();
       
+      $estado0 = new estado_servicio();
+      $estados = $estado0->all();
+      shuffle($estados);
+      
       $recargo = FALSE;
       if( $clientes[0]->recargo OR mt_rand(0, 4) == 0 )
       {
@@ -1953,7 +1958,7 @@ class generar_datos_prueba
             $serv->codejercicio = $eje->codejercicio;
             $serv->fechainicio = Date('d-m-Y H:i', strtotime($serv->fecha.' +'.mt_rand(1, 18).' days'));
             $serv->fechafin = date('Y-m-d H:i', strtotime($serv->fechainicio.' +'.mt_rand(10, 59).' minutes'));   
-            $serv->idestado = mt_rand(1, 2);
+            $serv->idestado = $estados[0]->id;
             $serv->garantia = ( mt_rand(0, 1) == 1 );
             $serv->prioridad = mt_rand(1, 4);
             
