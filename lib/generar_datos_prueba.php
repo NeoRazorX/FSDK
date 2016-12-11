@@ -1117,7 +1117,6 @@ class generar_datos_prueba
                   
                   $lin->irpf = $alb->irpf;
                   
-                  
                   if($regimeniva == 'Exento')
                   {
                      $lin->codimpuesto = NULL;
@@ -1136,6 +1135,12 @@ class generar_datos_prueba
                   
                   if( $lin->save() )
                   {
+                     if( isset($articulos[$numlineas]) )
+                     {
+                        /// descontamos del stock
+                        $articulos[$numlineas]->sum_stock($alb->codalmacen, 0 - $lin->cantidad);
+                     }
+                     
                      $alb->neto += $lin->pvptotal;
                      $alb->totaliva += ($lin->pvptotal * $lin->iva/100);
                      $alb->totalirpf += ($lin->pvptotal * $lin->irpf/100);
@@ -1254,7 +1259,7 @@ class generar_datos_prueba
                   $modcantidad = -1;
                }
                
-               $numlineas = $this->cantidad(0, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 400);
                while($numlineas > 0)
                {
                   $lin = new linea_albaran_proveedor();
@@ -1303,6 +1308,12 @@ class generar_datos_prueba
                   
                   if( $lin->save() )
                   {
+                     if( isset($articulos[$numlineas]) )
+                     {
+                        /// sumamos al stock
+                        $articulos[$numlineas]->sum_stock($alb->codalmacen, $lin->cantidad, TRUE);
+                     }
+                     
                      $alb->neto += $lin->pvptotal;
                      $alb->totaliva += ($lin->pvptotal * $lin->iva/100);
                      $alb->totalirpf += ($lin->pvptotal * $lin->irpf/100);
@@ -1608,7 +1619,7 @@ class generar_datos_prueba
             {
                $articulos = $this->random_articulos();
                
-               $numlineas = $this->cantidad(0, 10, 200);
+               $numlineas = $this->cantidad(0, 10, 400);
                while($numlineas > 0)
                {
                   $lin = new linea_pedido_proveedor();
