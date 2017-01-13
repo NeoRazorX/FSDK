@@ -2,7 +2,7 @@
 
 /*
  * @author Carlos García Gómez      neorazorx@gmail.com
- * @copyright 2016, Carlos García Gómez. All Rights Reserved.
+ * @copyright 2016-2017, Carlos García Gómez. All Rights Reserved.
  */
 
 require_model('albaran_cliente.php');
@@ -553,7 +553,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $cliente = new cliente();
-         $cliente->fechaalta = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016) );
+         $cliente->fechaalta = date( mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y')) );
          
          if( mt_rand(0, 24) == 0 )
          {
@@ -997,7 +997,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $alb = new albaran_cliente();
-         $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $alb->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $alb->codalmacen = $this->empresa->codalmacen;
          $alb->codpago = $this->empresa->codpago;
@@ -1195,7 +1195,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $alb = new albaran_proveedor();
-         $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $alb->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $alb->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $alb->codalmacen = $this->empresa->codalmacen;
          $alb->codpago = $this->empresa->codpago;
@@ -1368,7 +1368,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $ped = new pedido_cliente();
-         $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $ped->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $ped->codalmacen = $this->empresa->codalmacen;
          $ped->codpago = $this->empresa->codpago;
@@ -1562,7 +1562,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $ped = new pedido_proveedor();
-         $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $ped->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $ped->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $ped->codalmacen = $this->empresa->codalmacen;
          $ped->codpago = $this->empresa->codpago;
@@ -1722,7 +1722,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $presu = new presupuesto_cliente();
-         $presu->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $presu->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $presu->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $presu->codalmacen = $this->empresa->codalmacen;
          $presu->codpago = $this->empresa->codpago;
@@ -1912,7 +1912,7 @@ class generar_datos_prueba
       while($num < $max)
       {
          $serv = new servicio_cliente();
-         $serv->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, 2016);
+         $serv->fecha = mt_rand(1, 28).'-'.mt_rand(1, 12).'-'.mt_rand(2013, date('Y'));
          $serv->hora = mt_rand(10, 20).':'.mt_rand(10, 59).':'.mt_rand(10, 59);
          $serv->codalmacen = $this->empresa->codalmacen;
          $serv->codpago = $this->empresa->codpago;
