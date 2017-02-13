@@ -1,3 +1,4 @@
-Ayudas en el desarrollo y testeo de plugins para FacturaScripts.<br/>
+Ayudas en el desarrollo y testeo de plugins para FacturaScripts.
 Permite generar datos de prueba, generar plugins de ejemplo y modelos y controladores a partir de una tabla.<br/>
+Licencia LGPL 3<br/>
 <b>Accesible desde</b>: Admin &gt; FSDK
