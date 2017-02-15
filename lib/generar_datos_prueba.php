@@ -770,6 +770,12 @@ class generar_datos_prueba
             $proveedor->regimeniva = 'Exento';
          }
          
+         if( mt_rand(0, 24) == 0 )
+         {
+            $proveedor->debaja = TRUE;
+            $proveedor->fechabaja = date('d-m-Y');
+         }
+         
          $proveedor->codproveedor = $proveedor->get_new_codigo();
          if( $proveedor->save() )
          {
