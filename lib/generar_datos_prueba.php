@@ -341,7 +341,8 @@ class generar_datos_prueba
       
       $descripciones1 = array(
           'Una alcachofa', 'Un motor', 'Una targeta gráfica (GPU)', 'Un procesador',
-          'Un coche', 'Un dispositivo tecnológico', 'Un magnetofón', 'Un palo', 'un cubo de basura'
+          'Un coche', 'Un dispositivo tecnológico', 'Un magnetofón', 'Un palo',
+          'un cubo de basura', "Un objeto pequeño d'or", '"La hostia"'
       );
       shuffle($descripciones1);
       
@@ -860,7 +861,8 @@ class generar_datos_prueba
           'Joe', 'Cristiano', 'Mohamed', 'John', 'Ali', 'Pastor',
           'Barak', 'Sadam', 'Donald', 'Jorge', 'Joel', 'Pedro', 'Mariano',
           'Albert', 'Alberto', 'Gorka', 'Cecilia', 'Carmena', 'Pichita',
-          'Alicia', 'Laura', 'Riola', 'Wilson', 'Jaume', 'David'
+          'Alicia', 'Laura', 'Riola', 'Wilson', 'Jaume', 'David',
+          "D'Ambrosio", '"El nota"', '"El puto amo"'
       );
       
       shuffle($nombres);
@@ -878,7 +880,8 @@ class generar_datos_prueba
           'Escobar', 'Mendoza', 'Pérez', 'Cruz', 'Lee', 'Smith', 'Humilde',
           'Hijo de Dios', 'Petrov', 'Maximiliano', 'Nieve', 'Snow', 'Trump',
           'Obama', 'Ali', 'Stark', 'Sanz', 'Rajoy', 'Sánchez', 'Iglesias',
-          'Rivera', 'Tumor', 'Lanister', 'Suarez', 'Aznar', 'Botella', 'Errejón'
+          'Rivera', 'Tumor', 'Lanister', 'Suarez', 'Aznar', 'Botella',
+          'Errejón', "D'Ambrosio", 'Ñostromo'
       );
       
       shuffle($apellidos);
@@ -898,7 +901,7 @@ class generar_datos_prueba
           'Investments', 'Solutions', 'Neo', 'Ming', 'Tube', 'Pear', 'Apple',
           'Dolphin', 'Chrome', 'Cat', 'Hat', 'Linux', 'Soft', 'Mobile', 'Phone',
           'XL', 'Open', 'Thunder', 'Zero', 'Scorpio', 'Zelda', '10', 'V', 'Q',
-          'X', 'Arch', 'Arco', 'Broken', 'Arkam', 'RX'
+          'X', 'Arch', 'Arco', 'Broken', 'Arkam', 'RX', "d'Art", 'Peña', '"La cosa"'
       );
       
       $separador = array(
@@ -980,7 +983,8 @@ class generar_datos_prueba
       );
       $nombres = array(
           'Infante', 'Principal', 'Falsa', '58', '74',
-          'Pacheco', 'Baleares', 'Del Pacífico', 'Rue'
+          'Pacheco', 'Baleares', 'Del Pacífico', 'Rue',
+          "d'Ambrosio", 'Bañez', '"La calle"'
       );
       
       shuffle($tipos);
