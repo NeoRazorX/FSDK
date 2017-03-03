@@ -190,7 +190,7 @@ class generar_datos_prueba
     */
    protected function txt2codigo($txt, $len = 8)
    {
-      $txt = str_replace( array(' ','-','_','&','ó',':'), array('','','','','O',''), strtoupper($txt));
+      $txt = str_replace( array(' ','-','_','&','ó',':','ñ'), array('','','','','O','','N'), strtoupper($txt));
       
       if( strlen($txt) < $len )
       {
