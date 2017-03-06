@@ -125,6 +125,10 @@ class fsdk_plan_contable extends fs_controller
             $this->new_message('Se ha detectado que las cuentas tienen una longitud de '
                     .$longcuentas.', y las subcuentas una longitud de '.$longsubcuentas.'.');
             
+            $continuar = TRUE;
+            $num_epigrafes = 0;
+            $num_cuentas = 0;
+            $num_subcuentas = 0;
             while(!feof($fcsv)) {
                $aux = trim(fgets($fcsv));
                if($aux != '')
@@ -149,7 +153,6 @@ class fsdk_plan_contable extends fs_controller
                   if($linea[0] != 'CODIGO' AND $linea[1] != 'NOMBRE')
                   {
                      /// ahora procesamos los datos en función de las longitudes de los códigos
-                     $continuar = TRUE;
                      switch( strlen($linea[0]) )
                      {
                         case 0:
@@ -158,14 +161,17 @@ class fsdk_plan_contable extends fs_controller
                         
                         case $longcuentas;
                            $continuar = $this->crear_cuenta($linea);
+                           $num_cuentas++;
                            break;
                         
                         case $longsubcuentas:
                            $continuar = $this->crear_subcuenta($linea);
+                           $num_subcuentas++;
                            break;
                         
                         default:
                            $continuar = $this->crear_epigrafe($linea);
+                           $num_epigrafes++;
                            break;
                      }
                      
@@ -175,6 +181,11 @@ class fsdk_plan_contable extends fs_controller
                      }
                   }
                }
+            }
+            
+            if($continuar)
+            {
+               $this->new_message('Proceso terminado: '.$num_epigrafes.' epígrafes, '.$num_cuentas.' cuentas y '.$num_subcuentas.' subcuentas creadas.');
             }
          }
          else
