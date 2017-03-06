@@ -1,0 +1,59 @@
+{include="header"}
+
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="page-header">
+            <h1>
+               <i class="fa fa-balance-scale" aria-hidden="true"></i> CSV =&gt; Plan contable
+               <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
+                  <span class="glyphicon glyphicon-refresh"></span>
+               </a>
+            </h1>
+            <p class="help-block">
+               Permite generar un plan contable a partir de un CSV o <b>excel</b> con el listado
+               de cuentas y sus descripciones.
+            </p>
+         </div>
+      </div>
+   </div>
+   <form class="form" action="{$fsc->url()}#plugins" enctype="multipart/form-data" method="post">
+      <input type="hidden" name="csv" value="TRUE"/>
+      <div class="row">
+         <div class="col-sm-3">
+            <div class="form-group">
+               <input type="file" name="fcsv" accept=".csv"/>
+               <p class="help-block">
+                  El archivo debe tener las columnas <b>CODIGO</b> y <b>NOMBRE</b>
+               </p>
+            </div>
+         </div>
+         <div class="col-sm-3">
+            <div class="form-group">
+               Separador de columnas:
+               <input type="text" name="separador" value="{$fsc->separador}" maxlength="1" class="form-control" autocomplete="off"/>
+            </div>
+         </div>
+         <div class="col-sm-3">
+            <a href="{$fsc->ejercicio->url()}">Ejercicio</a>:
+            <select name="codejercicio" class="form-control">
+            {loop="$fsc->ejercicio->all()"}
+               {if="$value->codejercicio==$fsc->codejercicio"}
+               <option value="{$value->codejercicio}" selected="">{$value->nombre}</option>
+               {else}
+               <option value="{$value->codejercicio}">{$value->nombre}</option>
+               {/if}
+            {/loop}
+            </select>
+         </div>
+         <div class="col-sm-3">
+            <br/>
+            <button type="submit" class="btn btn-primary" onclick="this.disabled=true;this.form.submit();">
+               <span class="glyphicon glyphicon-import" aria-hidden="true"></span>&nbsp; Procesar
+            </button>
+         </div>
+      </div>
+   </form>
+</div>
+
+{include="footer"}
