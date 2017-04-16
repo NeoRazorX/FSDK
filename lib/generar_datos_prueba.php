@@ -18,9 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_model('agente.php');
 require_model('albaran_cliente.php');
 require_model('albaran_proveedor.php');
-require_model('agente.php');
 require_model('almacen.php');
 require_model('articulo.php');
 require_model('cliente.php');
@@ -30,8 +30,8 @@ require_model('cuenta_banco_proveedor.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('estado_servicio.php');
-require_model('familia.php');
 require_model('fabricante.php');
+require_model('familia.php');
 require_model('forma_pago.php');
 require_model('grupo_clientes.php');
 require_model('impuesto.php');
