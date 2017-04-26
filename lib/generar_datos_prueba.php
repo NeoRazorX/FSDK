@@ -659,12 +659,12 @@ class generar_datos_prueba
                   $dir->apartado = mt_rand(1234, 99999);
                }
                
-               if( mt_rand(0, 1) == 0 )
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
                {
                   $dir->domenvio = FALSE;
                }
                
-               if( mt_rand(0, 1) == 0 )
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
                {
                   $dir->domfacturacion = FALSE;
                }
@@ -805,7 +805,7 @@ class generar_datos_prueba
                   $dir->apartado = mt_rand(1234, 99999);
                }
                
-               if( mt_rand(0, 1) == 0 )
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
                {
                   $dir->direccionppal = FALSE;
                }
