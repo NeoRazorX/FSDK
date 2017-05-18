@@ -23,38 +23,38 @@
  * @author ________
  */
 
-class //{MODEL}// extends fs_standard_model {
-//{FIELDS_DECLARATION}//
+class /*{MODEL}*/ extends fs_standard_model {
+/*{FIELDS_DECLARATION}*/
 
    /* -----------------
     * P R O T E C T E D
     * ----------------- */
 
-    protected function test() {
+   protected function test() {
       /*
       PUT HERE MODEL DATA VALIDATIONS
       EXAMPLE:
-          if($this->field_Numeric == 0) {
-               $this->new_error_msg('Must be inform a code value');
-               return FALSE;
-          }
-          return TRUE;
+         if($this->field_Numeric == 0) {
+            $this->new_error_msg('Must be inform a code value');
+            return FALSE;
+         }
+         return TRUE;
       */
       return parent::test();
-    }
+   }
 
-    protected function update() {
-      $sql = 'UPDATE //{TABLE_NAME}// SET '
+   protected function update() {
+      $sql = 'UPDATE /*{TABLE_NAME}*/ SET '
                    . '  field1 = value1'
                    . ', fieldN = valueN'
             . 'WHERE field_key1 = key_value1;';
 
       return $this->db->exec($sql);
-    }
+   }
 
     protected function insert() {
-      $sql = 'INSERT INTO //{TABLE_NAME}//'
-              . '(//{FIELDS_COMMASEPARATED}//)'
+      $sql = 'INSERT INTO /*{TABLE_NAME}*/'
+              . '(/*{FIELDS_COMMASEPARATED}*/)'
             . VALUES
               . '(...);';
 
@@ -66,9 +66,9 @@ class //{MODEL}// extends fs_standard_model {
     * ----------- */
 
     public function __construct($data = FALSE) {
-        parent::__construct('//{TABLE_NAME}//');
+        parent::__construct('/*{TABLE_NAME}*/');
 
-//{FIELDS_KEYS}//
+/*{FIELDS_KEYS}*/
 
         if ($data)
           $this->load_from_data($data);
@@ -115,16 +115,16 @@ class //{MODEL}// extends fs_standard_model {
     }
     */
 
-    public function exists(): bool {
+    public function exists() {
         return parent::exists();
     }
 
     public function clear() {
-//{FIELDS_CLEAR}//
+/*{FIELDS_CLEAR}*/
     }
 
     public function load_from_data($data) {
-//{FIELDS_LOAD}//
+/*{FIELDS_LOAD}*/
     }
 
     public function install() {

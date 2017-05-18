@@ -20,169 +20,225 @@
 
 require_once __DIR__ . '/../lib/xml_from_table.php';
 
-
 class fsdk_tabla extends fs_controller {
 
-    public $nombre_modelo;
-    public $tabla;
-    public $xml;
-    private $tab = '    ';
+   public $nombre_modelo;
+   public $tabla;
+   public $xml;
+   public $modelo;
+   public $controlador;
+   private $tab = '   ';
+   private $columns;
 
-    /* -------------
-     * P R I V A T E
-     * ------------- */
+   private function modelname_from_table($table) {
+      if (substr($table, -1) == 's') {
+         switch (substr($table, -3)) {
+            case "nes":
+            case "res": {
+                  $result = substr($table, 0, -2);
+                  break;
+               }
 
-    private function modelname_from_table($table): string {
-        if (substr($table, -1) == 's') {
-            switch (substr($table, -3)) {
-                case "nes":
-                case "res": {
-                        $result = substr($table, 0, -2);
-                        break;
-                    }
+            default: {
+                  $result = substr($table, 0, -1);
+               }
+         }
+      } else
+         $result = $table;
 
-                default: {
-                        $result = substr($table, 0, -1);
-                    }
-            }
-        } else
-            $result = $table;
+      return $result;
+   }
 
-        return $result;
-    }
+   private function get_primarykeys($table) {
+      $constrains = $this->db->get_constraints($table);
+      $result = [];
 
-    private function get_primarykeys($table): array {
-        $constrains = $this->db->get_constraints($table);
-        $result = [];
+      foreach ($constrains as $column) {
+         if (($column['tipo'] == 'PRIMARY KEY') OR ( $column['tipo'] == 'p'))
+            $result[] = $column['column_name'];
+      }
+      return $result;
+   }
 
-        foreach ($constrains as $column) {
-            if (($column['tipo'] == 'PRIMARY KEY') OR ($column['tipo'] == 'p'))
-                array_push($result, $column['column_name']);
-        }
-        return $result;
-    }
-    
-    private function fields_comma($columns): string {
-        $result = '';
-        foreach ($columns as $col) {
-            if ($result)
-                $result .= ',';
-            $result .= $col['column_name'];
-        }
-        return $result;
-    }
+   private function fields_comma($columns) {
+      $result = '';
+      foreach ($columns as $col) {
+         if ($result)
+            $result .= ',';
+         $result .= $col['column_name'];
+      }
+      return $result;
+   }
 
-    private function fields_list($columns, $prefix, $sufix): string {
-        $result = '';
-        foreach ($columns as $col) {
-            $result .= $prefix . $col['column_name'] . $sufix;
-        }
-        return $result;
-    }
+   private function fields_list($columns, $prefix, $sufix) {
+      $result = '';
+      foreach ($columns as $col) {
+         $result .= $prefix . $col['column_name'] . $sufix;
+      }
+      return $result;
+   }
 
-    private function fields_declare($columns): string {
-        $prefix = $this->tab . 'private $';
-        $sufix = ";\n";
+   private function fields_declare($columns) {
+      $prefix = $this->tab . 'private $';
+      $sufix = ";\n";
 
-        return $this->fields_list($columns, $prefix, $sufix);
-    }
+      return $this->fields_list($columns, $prefix, $sufix);
+   }
 
-    private function fields_clear($columns): string {
-        $prefix = $this->tab . $this->tab . '$this->';
-        $sufix = " = '';\n";
+   private function fields_clear($columns) {
+      $prefix = $this->tab . $this->tab . '$this->';
+      $sufix = " = '';\n";
 
-        return $this->fields_list($columns, $prefix, $sufix);
-    }
+      return $this->fields_list($columns, $prefix, $sufix);
+   }
 
-    private function fields_load($columns): string {
-        $prefix = $this->tab . $this->tab . '$this->';
-        $result = '';
-        foreach ($columns as $col) {
-            $result .= $prefix . $col['column_name'] . ' = $data[\'' . $col['column_name'] . '\']' . ";\n";
-        }
-        return $result;
-    }
+   private function fields_load($columns) {
+      $prefix = $this->tab . $this->tab . '$this->';
+      $result = '';
+      foreach ($columns as $col) {
+         $result .= $prefix . $col['column_name'] . ' = $data[\'' . $col['column_name'] . '\']' . ";\n";
+      }
+      return $result;
+   }
 
-    private function fields_keys($key_fields): string {
-        $prefix = $this->tab . $this->tab;
-        $result = '';
-        foreach ($key_fields as $fieldname) {
-            $result .= $prefix . '$this->add_keyfield(\''. $fieldname . '\');' . "\n";
-        }          
-        return $result;
-    }
-    
-    /* -----------------
-     * P R O T E C T E D
-     * ----------------- */
+   private function fields_keys($key_fields) {
+      $prefix = $this->tab . $this->tab;
+      $result = '';
+      foreach ($key_fields as $fieldname) {
+         $result .= $prefix . '$this->add_keyfield(\'' . $fieldname . '\');' . "\n";
+      }
+      return $result;
+   }
 
-    protected function private_core() {
-        $table = (string) filter_input(INPUT_GET, 'table');
+   private function fields_columns($columns) {
+      $result = '';
+      $display = 'left';
+      $prefix = $this->tab . $this->tab . $this->tab;
+      $cont = 1;
 
-        if ($this->db->table_exists($table)) {
-            $this->page->title = 'Tabla ' . $table;
-            $this->tabla = $table;
-            $this->nombre_modelo = $this->modelname_from_table($table);
+      foreach ($columns as $col) {
+         if ($cont > 6)
+            $display = 'none';
+         
+         $result .= $prefix . "['label' => '" . ucfirst($col['column_name']) . "', 'field' => '" . $col['column_name']  . "', 'display' => '" . $display . "'],\n";
+         $cont++;
+      }
 
-            $this->export_structure_xml($table);
-            $this->generar_modelo($table);
-        } else {
-            $this->new_error_msg('Tabla desconocida.', 'error', FALSE, FALSE);
-        }
-    }
+      return $result;
+   }
 
-    protected function export_structure_xml($table) {
-        // Create XML file
-        $xml = new xml_from_table($this->db, $table);
-        $xml->add_columns();
-        $xml->add_constrains();
+   private function fields_orderby($columns) {
+      $result = '';
+      $prefix = $this->tab . $this->tab . $this->tab;
+      $cont = 1;
 
-        // Set to view
-        $this->xml = $xml->read();
-    }
+      foreach ($columns as $col) {
+         if ($cont > 3)
+            break;
+         
+         $result .= $prefix . "'" . ucfirst($col['column_name']) . "' => '" . $col['column_name'] . " ASC',\n";
+         $result .= $prefix . "'" . ucfirst($col['column_name']) . " Desc' => '" . $col['column_name'] . " DESC',\n";
+                  
+         $cont++;
+      }
+      
+      return $result;      
+   }
+   
+   /* -----------------
+    * P R O T E C T E D
+    * ----------------- */
 
-    protected function generar_modelo($table) {
-        $modelname = $this->modelname_from_table($table);
-        $columns = $this->db->get_columns($table);
-        $key_fields = $this->get_primarykeys($table);
+   protected function private_core() {
+      parent::private_core();
 
-        // Load Model Template
-        $template = file_get_contents(__DIR__ . '/../lib/template_model.txt');
+      $table = (string) filter_input(INPUT_GET, 'table');
 
-        // Calculate template values
-        $template_var = array('//{TABLE_NAME}//',
-            '//{MODEL}//',
-            '//{FIELDS_DECLARATION}//',
-            '//{FIELDS_KEYS}//',
-            '//{FIELDS_CLEAR}//',
-            '//{FIELDS_COMMASEPARATED}//',
-            '//{FIELDS_LOAD}//');
+      if ($this->db->table_exists($table)) {
+         $this->page->title = 'Tabla ' . $table;
+         $this->tabla = $table;
+         $this->nombre_modelo = $this->modelname_from_table($table);
 
-        $template_values = array($table,
-            $modelname,
-            $this->fields_declare($columns),
-            $this->fields_keys($key_fields),
-            $this->fields_clear($columns),
-            $this->fields_comma($columns),
-            $this->fields_load($columns));
+         $this->columns = $this->db->get_columns($table);
 
-        // Apply values to template
-        $this->modelo = str_replace($template_var, $template_values, $template);
-    }
+         $this->export_structure_xml($table);
+         $this->generar_modelo($table);
+         $this->generar_controlador($table);
+      } else {
+         $this->new_error_msg('Tabla desconocida.', 'error', FALSE, FALSE);
+      }
+   }
 
-    /* -----------
-     * P U B L I C
-     * ----------- */
+   protected function export_structure_xml($table) {
+      // Create XML file
+      $xml = new xml_from_table($this->db, $table);
+      $xml->add_columns();
+      $xml->add_constrains();
 
-    public function __construct() {
-        parent::__construct(__CLASS__, 'Tabla', 'admin', FALSE, FALSE);
-    }
+      // Set to view
+      $this->xml = $xml->read();
+   }
 
-    public function url() {
-        if ($this->tabla) {
-            return parent::url() . '&table=' . $this->tabla;
-        } else {
-            return parent::url();
-        }
-    }
+   protected function generar_modelo($table) {
+      $key_fields = $this->get_primarykeys($table);
+
+      // Load Model Template
+      $template = file_get_contents(__DIR__ . '/../template/model.php');
+
+      // Calculate template values
+      $template_var = ['/*{TABLE_NAME}*/',
+         '/*{MODEL}*/',
+         '/*{FIELDS_DECLARATION}*/',
+         '/*{FIELDS_KEYS}*/',
+         '/*{FIELDS_CLEAR}*/',
+         '/*{FIELDS_COMMASEPARATED}*/',
+         '/*{FIELDS_LOAD}*/'];
+
+      $template_values = [$table,
+         $this->nombre_modelo,
+         $this->fields_declare($this->columns),
+         $this->fields_keys($key_fields),
+         $this->fields_clear($this->columns),
+         $this->fields_comma($this->columns),
+         $this->fields_load($this->columns)];
+
+      // Apply values to template
+      $this->modelo = str_replace($template_var, $template_values, $template);
+   }
+
+   protected function generar_controlador($table) {
+      // Load Model Template
+      $template = file_get_contents(__DIR__ . '/../template/controller.php');
+
+      // Calculate template values
+      $template_var = ['/*{MODEL}*/',
+         '/*{CONTROLLER}*/',
+         '/*{FIELDS_COLUMNS}*/',
+         '/*{FIELDS_ORDERBY}*/'];
+
+      $template_values = [$this->nombre_modelo,
+         $table,
+         $this->fields_columns($this->columns),
+         $this->fields_orderby($this->columns)];
+
+      // Apply values to template
+      $this->controlador = str_replace($template_var, $template_values, $template);
+   }
+
+   /* -----------
+    * P U B L I C
+    * ----------- */
+
+   public function __construct() {
+      parent::__construct(__CLASS__, 'Tabla', 'admin', FALSE, FALSE);
+   }
+
+   public function url() {
+      if ($this->tabla) {
+         return parent::url() . '&table=' . $this->tabla;
+      } else {
+         return parent::url();
+      }
+   }
+
 }
