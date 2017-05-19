@@ -1,0 +1,168 @@
+<!-- Menu Header  -->
+{include="header"}
+
+<!-- Page Header -->
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-7 col-xs-6">
+         <div class="btn-group hidden-xs">
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
+            </a>
+            {if="$fsc->page->is_default()"}
+            <a class="btn btn-sm btn-default active" href="{$fsc->url()}&amp;default_page=FALSE" title="Marcada como página de inicio (pulsa de nuevo para desmarcar)">
+               <i class="fa fa-bookmark" aria-hidden="true"></i>
+            </a>
+            {else}
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}&amp;default_page=TRUE" title="marcar como página de inicio">
+               <i class="fa fa-bookmark-o" aria-hidden="true"></i>
+            </a>
+            {/if}
+         </div>
+         <div class="btn-group">
+            <a href="#" id="b_new_record" class="btn btn-sm btn-success">
+               <span class="glyphicon glyphicon-plus"></span>
+               <span class="hidden-xs">&nbsp;Nuevo</span>
+            </a>
+            {loop="$fsc->extensions"}
+               {if="$value->type=='button'"}
+               <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+               {/if}
+            {/loop}
+         </div>
+      </div>
+      <div class="col-sm-5 col-xs-6 text-right">
+         <h2 style="margin-top: 0px;">
+            <i class="fa {$fsc->icon} hidden-xs" aria-hidden="true"></i> {$fsc->title}
+         </h2>
+      </div>
+   </div>
+</div>
+
+<!-- Main Data -->
+<div id="tab_options" role="tabpanel">
+   <!-- Tabs declaration -->
+   <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active">
+         <a href="#search" aria-controls="search" role="tab" data-toggle="tab">
+            <span class="glyphicon glyphicon-search"></span>
+            <span class="hidden-xs">&nbsp; Buscar</span>
+            <span class="badge">{$fsc->count}</span>
+         </a>
+      </li>
+      {loop="$fsc->extensions"}
+         {if="$value1->type=='tab'"}
+         <li role="presentation">
+            <a href="#ext_{$value1->name}" aria-controls="ext_{$value1->name}" role="tab" data-toggle="tab">{$value1->text}</a>
+         </li>
+         {/if}
+      {/loop}
+   </ul>
+
+   <!-- Main Tab -->
+   <div class="tab-content">        
+      <div role="tabpanel" class="tab-pane active" id="search">
+         <!-- Filters Row -->
+         <form name="f_custom_search" action="{$fsc->url()}" method="post" class="form">
+            <div class="container-fluid" style="margin-top: 15px; margin-bottom: 10px;">
+               <div class="row">
+                  <!-- Main filter -->
+                  <div class="col-sm-2">
+                     <div class="input-group">
+                        <input class="form-control" type="text" name="query" value="{$fsc->query}" autocomplete="off" placeholder="Buscar">
+                        <span class="input-group-btn hidden-sm">
+                           <button class="btn btn-primary" type="submit">
+                              <span class="glyphicon glyphicon-search"></span>
+                           </button>
+                        </span>
+                     </div>
+                  </div>
+
+                  <!-- Aditionals filters -->
+                  {loop="$fsc->filters"}
+                  <div class="col-sm-2">
+                  </div>
+                  {/loop}
+
+                  <!-- Order by selector -->
+                  <div class="col-sm-2 pull-right">
+                     <div class="input-group">
+                        <div class="input-group-addon">
+                           <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+                        </div>
+                        <select name="order" class="form-control" onchange="this.form.submit()">
+                           {loop="$fsc->orderby"}
+                           <option value="{$value1}" {if="$fsc->selected_orderby==$value1"} selected=""{/if}>{$key1}</option>
+                           {/loop}
+                        </select>
+                     </div>
+                  </div>                        
+               </div>
+            </div>
+         </form>
+
+         <!-- Data Row -->
+         <div class="table-responsive">
+            <!-- Data Table -->
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     {loop="$fsc->fields"}
+                     {if="$value1['display']!='none'"}
+                     <th class="text-{$value1['display']}">{$value1['label']}</th>
+                     {/if}
+                     {/loop}
+                  </tr>
+               </thead>
+               {loop="$fsc->cursor"}
+               <tr>
+                  {loop="$fsc->fields"}
+                  {if="$value2['display']!='none'"}
+                  <td class="text-{$value2['display']}">{$value1[$value2['field']]}</th>
+                     {/if}
+                     {/loop}                        
+               </tr>
+               {else}
+               <tr class="warning">
+                  <td colspan="6">No hay registros con esas condiciones. Pulse el botón <b>Nuevo</b> para dar de alta.</td>
+               </tr>
+               {/loop}
+            </table>
+         </div>
+
+         <!-- Footer Navigation -->
+         <div class="container-fluid">
+            <div class="row">
+               <div class="col-sm-12 text-center">
+                  <ul class="pagination">
+                     {loop="$fsc->pagination()"}
+                     <li{if="$value1['active']"} class="active"{/if}>
+                        <a href="{$value1['url']}">
+                           {if="$value1['icon']"}
+                           <span class="glyphicon {$value1['icon']}" aria-hidden="true" />
+                           {else}
+                           <span>{$value1['page']}</span>
+                           {/if}
+                        </a>
+                     </li>
+                     {/loop}
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Aditionals Tabs -->
+      {loop="$fsc->extensions"}
+      {if="$value1->type=='tab'"}
+      <div role="tabpanel" class="tab-pane" id="ext_{$value1->name}">
+         <iframe src="index.php?page={$value1->from}{$value1->params}" 
+                 width="100%" height="2000" frameborder="0"></iframe>
+      </div>
+      {/if}
+      {/loop}        
+   </div>
+</div>
+
+<!-- Footer -->
+{include="footer"}
