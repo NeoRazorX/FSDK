@@ -90,8 +90,9 @@ class generar_datos_prueba {
     * @param int $len
     * @return string
     */
-   protected function txt2codigo($txt, $len = 8) {
-      $result = str_replace([' ', '-', '_', '&', 'ó', ':', 'ñ'], ['', '', '', '', 'O', '', 'N'], strtoupper($txt));
+   protected function txt2codigo($txt, $len = 8)
+   {
+      $result = str_replace( array(' ','-','_','&','ó',':','ñ','"',"'"), array('','','','','O','','N','',''), strtoupper($txt));
 
       if (strlen($result) > $len)
          $result = substr($result, 0, $len);
@@ -231,8 +232,8 @@ class generar_datos_prueba {
          $this->_loaddata($this->grupos, new grupo_clientes(), FALSE);
          $this->_loaddata($this->impuestos, new impuesto(), TRUE);
       } else {
-         $this->grupos = [];
-         $this->impuestos = [];
+         $this->grupos = array();
+         $this->impuestos = array();
       }
 
       $this->_loaddata($this->paises, new pais(), TRUE);
@@ -248,7 +249,7 @@ class generar_datos_prueba {
     */
    public function fabricantes($max = 50) {
       $fabri = new fabricante();
-      for ($num = 1; $num <= $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          $fabri->nombre = $this->empresa();
          $fabri->codfabricante = $this->txt2codigo($fabri->nombre);
          if (!$fabri->save())
@@ -268,7 +269,7 @@ class generar_datos_prueba {
       $fam = new familia();
       $codfamilia = NULL;
 
-      for ($num = 1; $num <= $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          $fam->descripcion = $this->empresa();
          $fam->codfamilia = $this->txt2codigo($fam->descripcion);
          $fam->madre = (mt_rand(0, 4) == 0) ? $codfamilia : NULL;
@@ -295,7 +296,7 @@ class generar_datos_prueba {
       $fam = new familia();
       $familias = $fam->all();
 
-      for ($num = 1; $num <= $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          if (mt_rand(0, 2) == 0) {
             shuffle($fabricantes);
             shuffle($familias);
@@ -370,7 +371,7 @@ class generar_datos_prueba {
     */
    public function agentes($max = 50) {
       $agente = new agente();
-      for ($num = 1; $num <= $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          $agente->f_nacimiento = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(1970, 1997));
          $agente->f_alta = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(2013, 2016));
 
@@ -435,7 +436,7 @@ class generar_datos_prueba {
       $max_nombres2 = count($nombres2) - 1;
 
       $grupo = new grupo_clientes();
-      for ($num = 1; $num < $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          $grupo->codgrupo = $grupo->get_new_codigo();
          $grupo->nombre = $nombres[mt_rand(0, $max_nombres)] . ' '
              . $nombres2[mt_rand(0, $max_nombres2)] . ' ' . $num;
@@ -457,7 +458,7 @@ class generar_datos_prueba {
       $dir = new direccion_cliente();
       $cuenta = new cuenta_banco_cliente();
 
-      for ($num = 1; $num < $max; ++$num) {
+      for ($num = 0; $num <= $max; ++$num) {
          $cliente->fechaalta = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(2013, date('Y')));
 
          if (mt_rand(0, 24) == 0) {
