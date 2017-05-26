@@ -474,6 +474,7 @@ class generar_datos_prueba {
                $cliente->personafisica = FALSE;
                break;
             case 1:
+               $cliente->nombre = $this->nombre() . ' ' . $this->apellidos();
                $cliente->razonsocial = $this->empresa();
                $cliente->personafisica = FALSE;
                break;
