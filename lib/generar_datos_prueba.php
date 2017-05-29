@@ -92,10 +92,10 @@ class generar_datos_prueba {
     */
    protected function txt2codigo($txt, $len = 8)
    {
-      $result = str_replace( array(' ','-','_','&','ó',':','ñ','"',"'"), array('','','','','O','','N','',''), strtoupper($txt));
+      $result = str_replace( array(' ','-','_','&','ó',':','ñ','"',"'",'*'), array('','','','','O','','N','','','-'), strtoupper($txt));
 
       if (strlen($result) > $len)
-         $result = substr($result, 0, $len);
+         $result = substr($result, 0, $len - 1).mt_rand(0, 9);
 
       return $result;
    }
@@ -222,8 +222,7 @@ class generar_datos_prueba {
       $this->db = $db;
       $this->empresa = $empresa;
       $this->ejercicio = new ejercicio();
-      $this->agentes = $this->random_agentes();
-
+      $this->_loaddata($this->agentes, new agente(), TRUE);
       $this->_loaddata($this->almacenes, new almacen(), TRUE);
       $this->_loaddata($this->divisas, new divisa(), TRUE);
       $this->_loaddata($this->formas_pago, new forma_pago(), TRUE);
@@ -249,14 +248,14 @@ class generar_datos_prueba {
     */
    public function fabricantes($max = 50) {
       $fabri = new fabricante();
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
          $fabri->nombre = $this->empresa();
          $fabri->codfabricante = $this->txt2codigo($fabri->nombre);
          if (!$fabri->save())
             break;
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
@@ -269,18 +268,17 @@ class generar_datos_prueba {
       $fam = new familia();
       $codfamilia = NULL;
 
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
          $fam->descripcion = $this->empresa();
          $fam->codfamilia = $this->txt2codigo($fam->descripcion);
          $fam->madre = (mt_rand(0, 4) == 0) ? $codfamilia : NULL;
-
          if (!$fam->save())
             break;
 
          $codfamilia = $fam->codfamilia;
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
@@ -296,7 +294,7 @@ class generar_datos_prueba {
       $fam = new familia();
       $familias = $fam->all();
 
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
          if (mt_rand(0, 2) == 0) {
             shuffle($fabricantes);
             shuffle($familias);
@@ -306,11 +304,6 @@ class generar_datos_prueba {
             }
          }
 
-         /* FIXME: Es necesario crear el objeto cada vez por el tratamiento 
-          * de la propiedad $art->exists en $art->->exists() 
-          * Esto genera la continua creacion y destruccion de objetos 
-          * asi como la ejecucion de inicializacion de propiedades
-          */
          $art = new articulo();
          $art->descripcion = $this->descripcion();
          $art->codimpuesto = $this->impuestos[0]->codimpuesto;
@@ -360,7 +353,7 @@ class generar_datos_prueba {
             $art->sum_stock($this->almacenes[0]->codalmacen, mt_rand(0, 20));
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
@@ -370,8 +363,8 @@ class generar_datos_prueba {
     * @return int
     */
    public function agentes($max = 50) {
-      $agente = new agente();
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
+         $agente = new agente();
          $agente->f_nacimiento = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(1970, 1997));
          $agente->f_alta = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(2013, 2016));
 
@@ -413,13 +406,11 @@ class generar_datos_prueba {
          if (mt_rand(0, 5) == 0)
             $agente->porcomision = $this->cantidad(0, 5, 20);
 
-         $agente->codagente = $agente->get_new_codigo();
-
          if (!$agente->save())
             break;
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
@@ -429,14 +420,14 @@ class generar_datos_prueba {
     * @return int
     */
    public function grupos_clientes($max = 50) {
-      $nombres = ['Profesionales', 'Profesional', 'Grandes compradores', 'Preferentes', 'Basico', 'Premium', 'Variado', 'Reservado', 'Técnico', 'Elemental'];
-      $nombres2 = ['VIP', 'PRO', 'NEO', 'XL', 'XXL', '50 aniversario', 'C', 'Z'];
+      $nombres = array('Profesionales', 'Profesional', 'Grandes compradores', 'Preferentes', 'Basico', 'Premium', 'Variado', 'Reservado', 'Técnico', 'Elemental');
+      $nombres2 = array('VIP', 'PRO', 'NEO', 'XL', 'XXL', '50 aniversario', 'C', 'Z');
 
       $max_nombres = count($nombres) - 1;
       $max_nombres2 = count($nombres2) - 1;
 
       $grupo = new grupo_clientes();
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
          $grupo->codgrupo = $grupo->get_new_codigo();
          $grupo->nombre = $nombres[mt_rand(0, $max_nombres)] . ' '
              . $nombres2[mt_rand(0, $max_nombres2)] . ' ' . $num;
@@ -444,7 +435,7 @@ class generar_datos_prueba {
             break;
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
@@ -454,11 +445,8 @@ class generar_datos_prueba {
     * @return int
     */
    public function clientes($max = 50) {
-      $cliente = new cliente();
-      $dir = new direccion_cliente();
-      $cuenta = new cuenta_banco_cliente();
-
-      for ($num = 0; $num <= $max; ++$num) {
+      for ($num = 0; $num < $max; ++$num) {
+         $cliente = new cliente();
          $cliente->fechaalta = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(2013, date('Y')));
 
          if (mt_rand(0, 24) == 0) {
@@ -516,6 +504,7 @@ class generar_datos_prueba {
          /// añadimos direcciones
          $num_dirs = mt_rand(0, 3);
          while ($num_dirs > 0) {
+            $dir = new direccion_cliente();
             $dir->codcliente = $cliente->codcliente;
             $dir->codpais = (mt_rand(0, 2) === 0) ? $this->paises[0]->codpais : $this->empresa->codpais;
 
@@ -538,11 +527,14 @@ class generar_datos_prueba {
          /// Añadimos cuentas bancarias
          $num_cuentas = mt_rand(0, 3);
          while ($num_cuentas > 0) {
+            $cuenta = new cuenta_banco_cliente();
             $cuenta->codcliente = $cliente->codcliente;
             $cuenta->descripcion = 'Banco ' . mt_rand(1, 999);
 
             $opcion = mt_rand(0, 2);
-            $cuenta->iban = ($opcion != 1) ? 'ES' . mt_rand(10, 99) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) : '';
+            $cuenta->iban = ($opcion != 1) ? 'ES' . mt_rand(10, 99) . ' ' . mt_rand(1000, 9999) . ' '
+                    . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' '
+                    . mt_rand(1000, 9999) : '';
 
             $cuenta->swift = ($opcion != 0) ? $this->random_string(8) : '';
 
@@ -555,7 +547,7 @@ class generar_datos_prueba {
          }
       }
 
-      return ($num - 1);
+      return $num;
    }
 
    /**
