@@ -28,8 +28,22 @@
  */
 class fs_standard_controller extends fs_controller {
 
+   /**
+    * Icons for orders. Making a standard for all views
+    */
+   const icono_asc = '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>';   
+   const icono_desc= '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>';
+
+   /**
+    * Icon for the view
+    * @var string
+    */
    public $icon;
    
+   /**
+    * Title for the view
+    * @var string
+    */
    public $title;
    
    /**
@@ -40,33 +54,27 @@ class fs_standard_controller extends fs_controller {
 
    /**
     * Cursor to data
-    * @var type 
+    * @var array of model 
     */
    public $cursor;
 
    /**
     * List of fields that are loaded in the cursor and its parameterization
-    * @var array of array("label" => "Field Label", "field" => "Field Name", "display" => "left/center/right/none")
+    * @var array of dictionary("label" => "Field Label", "field" => "Field Name", "display" => "left/center/right/none")
     */
    public $fields;
 
    /**
-    * Clause from of the select statement
-    * @var string
-    */
-   public $from;
-
-   /**
     * List of fields to select order by
-    * @var array("item text" => "fieldname with alias ASC/DESC")
+    * @var array of dictionary
     */
    public $orderby;
 
    /**
     * List of fields filters that are loaded in the cursor and its parameterization
-    * @var array of array("label" => "Field Label", "field" => "Field Name", "display" => "left/right/none")
+    * @var array of dictionay
     */
-   public $filters;                                // TODO: Create user custom filter system
+   public $filters;
    
    /**
     * First record to select from database
@@ -86,25 +94,40 @@ class fs_standard_controller extends fs_controller {
     */
    public $selected_orderby;
 
+   
+   /* -------------
+    * P R I V A T E
+    * ------------- */
+   
+   private function get_selected_order($order) {
+      $result = FALSE;
+      $keys = array_keys($this->orderby);
+      foreach ($keys as $item ) {
+         if ($item == $order) {
+            $result = $item;
+            break;
+         }
+      }
+
+      if ($result == FALSE)
+         $result = array_keys($this->orderby)[0];
+      
+      return $result;
+   }   
+   
+   /**
+    * Define a new filter data option
+    * @param string $type    ['select', 'checkbox']
+    * @param string $key     (filter identification)
+    * @param array  $options (options for configure and run filter)
+    */
+   private function add_filter($type, $key, $options) {      
+      $this->filters[$key] = ['type' => $type, 'value'=> $this->get_value($key), 'options' => $options];
+   }
+   
    /* -----------------
     * P R O T E C T E D
     * ----------------- */
-
-   /**
-    * Fields name list separated by ','
-    * @return string
-    */
-   protected function get_fields() {
-      $result = "";
-      
-      foreach ($this->fields as $item) {
-         if ($result != "")
-            $result .= ",";
-
-         $result .= $item['field'];
-      }
-      return $result;
-   }
 
    /**
     * Check if the parameter is informed in the url and returns its value
@@ -113,9 +136,8 @@ class fs_standard_controller extends fs_controller {
     */
    protected function get_value($field) {
       $result = FALSE;
-      if (isset($_REQUEST[$field]))
-         if ($_REQUEST[$field] != "")
-            $result = $_REQUEST[$field];
+      if (isset($_REQUEST[$field]))         
+         $result = $_REQUEST[$field];
 
       return $result;
    }
@@ -125,7 +147,34 @@ class fs_standard_controller extends fs_controller {
     * @return string
     */
    protected function get_where() {
-      return "1 = 1";
+      $result = "1 = 1";
+      
+      foreach ($this->filters as $key => $value) {
+         switch ($value['type']) {
+            case 'select': {
+               if ($value['value'] != "")
+                  $result .= " AND LOWER(" . $value['options']['field'] .") = LOWER('" . $value['value'] . "')";
+
+               break;
+            }
+
+            case 'checkbox': {
+               if ($value['value'])
+                  if ($value['options']['inverse'])
+                    $result .= " AND " . $value['options']['field'] . " = FALSE";
+                  else
+                    $result .= " AND " . $value['options']['field'] . " = TRUE";
+
+               break;
+            }
+            
+            default: {
+               break;
+            }
+         }
+      }
+      
+      return $result;
    }
 
    /**
@@ -137,41 +186,63 @@ class fs_standard_controller extends fs_controller {
       if ($this->get_value("query"))
          $result = "&query=" . $_REQUEST["query"];
 
+      foreach ($this->filters as $key => $value) {
+         if ($value['value'] != "")
+            $result .= "&" . $key . "=" . $value['value'];
+      }                 
+      
       return $result;
    }
 
    /**
-    * Load Array list from database table
-    * @param string $field : Field name to load
-    * @param string $table : Table name from load
-    * @param string $where : Where filter
-    * @return array
+    * Add a field to order by list
+    * @param string $field
+    * @param string $label
     */
-   protected function optionlist($field, $table, $where) {
-      $result = [];
-      if ($this->db->table_exists($table)) {
-         $sql = "SELECT DISTINCT " . $field . " FROM " . $table;
-
-         if ($where != "") {
-            $sql .= " WHERE " . $where;
-         }
-         $sql .= " ORDER BY " . $field . " ASC;";
-
-         $data = $this->db->select($sql);
-         foreach ($data as $item) {
-            $value = $item[$field];
-            if ($value != "") {
-               $result[mb_strtolower($value, "UTF8")] = $value;
-            }
-         }
-      }
-      return $result;
+   protected function add_orderby($field, $label = '') {
+      $key1 = strtolower($field).'_asc';
+      $key2 = strtolower($field).'_desc';
+      
+      if (empty($label))
+         $label = ucfirst ($field);
+      
+      $this->orderby[$key1] = ['icon'  => $this::icono_asc, 'label' => $label,'order' => $field.' ASC'];
+      $this->orderby[$key2] = ['icon'  => $this::icono_desc, 'label' => $label,'order' => $field.' DESC'];      
    }
-
+   
+   /**
+    * Add a filter type data table selection
+    * @param string $key      (Filter identifier)
+    * @param string $table    (Table name)
+    * @param string $field    (Field of the table with the data to show)
+    * @param string $where    (Where condition for table)
+    */
+   protected function add_filter_select($key, $table, $field = '', $where = '') {
+      if (empty($field))
+         $field = $key;
+      
+      $options = [ 'field' => $field, 'table' => $table, 'where' => $where ];
+      $this->add_filter('select', $key, $options);
+   }
+   
+   /**
+    * Add a filter type boolean condition
+    * @param string  $key     (Filter identifier)
+    * @param string  $label   (Human reader description)
+    * @param string  $field   (Field of the table to apply filter)
+    * @param boolean $inverse (If you need to invert the selected value) 
+    */
+   protected function add_filter_checkbox($key, $label, $field = '', $inverse = FALSE) {
+      if (empty($field))
+         $field = $key;
+      
+      $options = [ 'label' => $label, 'field' => $field, 'inverse' => $inverse ];
+      $this->add_filter('checkbox', $key, $options);
+   }   
+   
    /*
     * FacturaScript entry point
     */
-
    protected function private_core() {
       parent::private_core();
 
@@ -185,22 +256,11 @@ class fs_standard_controller extends fs_controller {
          $this->offset = 0;
 
       // Set order by selected
-      $this->selected_orderby = $this->get_value("order");
-      if (empty($this->selected_orderby) and count($this->orderby) > 0)
-         $this->selected_orderby = array_values($this->orderby)[0];
-
-      // Calculate all / search data
-      $sql_count = "SELECT COUNT(*) as total FROM " . $this->from . " WHERE " . $this->get_where();
-      $this->count = intval($this->db->select($sql_count)[0]["total"]);
-
-      if ($this->count > 0) {
-         $sql = "SELECT " . $this->get_fields()
-             .   " FROM " . $this->from
-             .  " WHERE " . $this->get_where()
-             .  " ORDER BY " . $this->selected_orderby;
-
-         $this->cursor = $this->db->select_limit($sql, FS_ITEM_LIMIT, $this->offset);
-      }
+      $order = $this->get_value("order");
+      if ($order)
+         $this->selected_orderby = $this->get_selected_order($order);
+      else
+         $this->selected_orderby = array_keys($this->orderby)[0];
    }
 
    /* -----------
@@ -215,9 +275,44 @@ class fs_standard_controller extends fs_controller {
       $this->offset = 0;
       $this->count = 0;
 
+      if (!is_array($this->orderby) or empty($this->orderby)) 
+         $this->orderby = [];
+
+      if (!is_array($this->filters) or empty($this->filters)) 
+         $this->filters = [];      
+      
       parent::__construct($name, $title, $folder, $admin, $shmenu, $important);
    }
 
+   /**
+    * Load Array list from database table
+    * @param string $field : Field name to load
+    * @param string $table : Table name from load
+    * @param string $where : Where filter
+    * @return array
+    */
+   public function optionlist($field, $table, $where) {
+      $result = [];
+      if ($this->db->table_exists($table)) {
+         $sql = "SELECT DISTINCT " . $field . " FROM " . $table
+              . " WHERE " . $field . " IS NOT NULL AND " . $field . " <> ''";
+
+         if ($where != "")
+            $sql .= " AND " .$where;
+
+         $sql .= " ORDER BY 1 ASC;";
+
+         $data = $this->db->select($sql);
+         foreach ($data as $item) {
+            $value = $item[$field];
+            if ($value != "") {
+               $result[mb_strtolower($value, "UTF8")] = $value;
+            }
+         }
+      }
+      return $result;
+   }
+   
    /*
     * Calculate footer pagination jumper
     * @return array of array(

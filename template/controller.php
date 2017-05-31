@@ -35,19 +35,25 @@ class /*{CONTROLLER}*/ extends fs_standard_controller {
        * Array of Array(label, field name, display [none, left, center, right]
        */
       $this->fields = [
-/*{FIELDS_COLUMNS}*/ //          ['label' => 'Titulo', 'field' => 'campo', 'display' => '[none/left/center/right]'],
+/*{FIELDS_COLUMNS}*/             // ['label' => 'Titulo', 'field' => 'campo', 'display' => '[none/left/center/right]'],
       ];
 
-      /* define orders fields:
-       * Array(title => field)
+      /* define orders fields. It's required to define at least one sort field.
+       * Array of Array ('key' => [icon, label, order])
        */
-      $this->orderby = [
-/*{FIELDS_ORDERBY}*/ //          'Texto' => 'campo ASC',
-      ];
-
-      // define tables condition from extract data
-      $this->from = "/*{CONTROLLER}*/";                // PUT HERE YOUR CUSTOM FROM CLAUSULE
-
+/*
+      $this->add_orderby('field name');
+ */
+      
+      /* define filters:
+       * Array of Array ('key' => [type, value, options[]])
+       * type (select, checkbox)
+       * Use the following functions for simplicity
+       */
+/*      
+      $this->add_filter_select('key or fieldname', 'table name');
+      $this->add_filter_checkbox('key', 'label', 'field name', invert[TRUE/FALSE]);
+*/      
       // run standard entry point
       parent::__construct(__CLASS__, '/*{CONTROLLER}*/', '(...)');   // PUT HERE MENU OPTION WHERE INSTALL CONTROLLER 
    }
@@ -60,49 +66,35 @@ class /*{CONTROLLER}*/ extends fs_standard_controller {
          $query = "LOWER('%" . $_REQUEST["query"] . "%')";
          
          // PUT HERE YOUR FIELDS WHERE APPLY FILTER
-         (...)
          
          /* EXAMPLE:
-         $result .= " AND (t1.codcliente LIKE " . $query
-             . " OR LOWER(t2.nombre) LIKE " . $query
-             . " OR LOWER(t1.provincia) LIKE " . $query
-             . " OR LOWER(t1.ciudad) LIKE " . $query
+         $result .= " AND (field1 LIKE " . $query
+             . " OR LOWER(field2) LIKE " . $query
+             . " OR LOWER(field3) LIKE " . $query
+             . " OR LOWER(field4) LIKE " . $query
              . ")";
           */
       }
 
       return $result;
    }
-
-   /* Custom fields list. Override parent get_fields()
-    * Example:
-   protected function get_fields() {
-      $result = "";
-  
-      foreach ($this->fields as $item) {
-         if ($result != "")
-            $result .= ",";
-
-         switch ($item['field']) {
-            case "nombre":
-            case "razonsocial":
-               $result .= "t2." . $item['field'];
-               break;
-
-            default:
-               $result .= "t1." . $item['field'];
-               break;
-         }
-      }
+   
+   protected function get_params() {
+      $result = parent::get_params();                  
       return $result;
    }
-   */
    
    protected function private_core() {
       // configure delete action
       $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
 
-      parent::private_core();                // Load data with estructure data
+      // Prepare and get parameters
+      parent::private_core();      
+      
+      // Load data with estructure data
+      $where = $this->get_where();
+      $order = $this->orderby[$this->selected_orderby]['order'];
+      $model = new /*{MODEL}*/;
+      $this->count = $model->all($this->cursor, $where, $order, $this->offset);
    }
-
 }

@@ -120,31 +120,16 @@ class fsdk_tabla extends fs_controller {
          if ($cont > 6)
             $display = 'none';
          
-         $result .= $prefix . "['label' => '" . ucfirst($col['column_name']) . "', 'field' => '" . $col['column_name']  . "', 'display' => '" . $display . "'],\n";
+         if (!empty($result))
+            $result .= ",\n";
+         
+         $result .= $prefix . "['label' => '" . ucfirst($col['column_name']) . "', 'field' => '" . $col['column_name']  . "', 'display' => '" . $display . "']";
          $cont++;
       }
 
       return $result;
    }
-
-   private function fields_orderby($columns) {
-      $result = '';
-      $prefix = $this->tab . $this->tab . $this->tab;
-      $cont = 1;
-
-      foreach ($columns as $col) {
-         if ($cont > 3)
-            break;
-         
-         $result .= $prefix . "'" . ucfirst($col['column_name']) . "' => '" . $col['column_name'] . " ASC',\n";
-         $result .= $prefix . "'" . ucfirst($col['column_name']) . " Desc' => '" . $col['column_name'] . " DESC',\n";
-                  
-         $cont++;
-      }
       
-      return $result;      
-   }
-   
    /* -----------------
     * P R O T E C T E D
     * ----------------- */
@@ -213,13 +198,11 @@ class fsdk_tabla extends fs_controller {
       // Calculate template values
       $template_var = ['/*{MODEL}*/',
          '/*{CONTROLLER}*/',
-         '/*{FIELDS_COLUMNS}*/',
-         '/*{FIELDS_ORDERBY}*/'];
+         '/*{FIELDS_COLUMNS}*/'];
 
       $template_values = [$this->nombre_modelo,
          $table,
-         $this->fields_columns($this->columns),
-         $this->fields_orderby($this->columns)];
+         $this->fields_columns($this->columns)];
 
       // Apply values to template
       $this->controlador = str_replace($template_var, $template_values, $template);

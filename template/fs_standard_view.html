@@ -24,6 +24,17 @@
                <span class="glyphicon glyphicon-plus"></span>
                <span class="hidden-xs">&nbsp;Nuevo</span>
             </a>
+
+            <a href="#" id="b_options" class="btn btn-sm btn-default">
+               <span class="glyphicon glyphicon-wrench" aria-hidden="true" title="Opciones de configuración"></span>
+               <span class="hidden-xs">&nbsp; Opciones</span>
+            </a>
+
+            <a href="#" id="b_print" class="btn btn-sm btn-default">
+               <span class="glyphicon glyphicon-print" aria-hidden="true" title="Imprimir lista de registros"></span>
+               <span class="hidden-xs">&nbsp; Imprimir</span>
+            </a>
+
             {loop="$fsc->extensions"}
                {if="$value->type=='button'"}
                <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
@@ -60,7 +71,7 @@
    </ul>
 
    <!-- Main Tab -->
-   <div class="tab-content">        
+   <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="search">
          <!-- Filters Row -->
          <form name="f_custom_search" action="{$fsc->url()}" method="post" class="form">
@@ -80,23 +91,59 @@
 
                   <!-- Aditionals filters -->
                   {loop="$fsc->filters"}
-                  <div class="col-sm-2">
-                  </div>
+                     {if="$value1['type']==='select'"}
+                     <div class="col-sm-2">
+                        <select name="{$key1}" class="form-control" onchange="this.form.submit()">
+                           <option value="">Cualquier {$key1}</option>
+                           <option value="">------</option>
+                           {loop="$fsc->optionlist($value1['options']['field'], $value1['options']['table'], $value1['options']['where'])"}
+                              {if="$key2===$value1['value']"}
+                              <option value="{$key2}" selected="">{$value2}</option>
+                              {else}
+                              <option value="{$key2}">{$value2}</option>
+                              {/if}
+                           {/loop}
+                        </select>
+                     </div>
+                     {/if}
+                     
+                     {if="$value1['type']==='checkbox'"}
+                     <div class="col-sm-1">
+                        <div class="checkbox-inline">
+                           <label>
+                              {if="$value1['value']"}
+                              <input type="checkbox" name="{$key1}" value="TRUE" checked="" onchange="this.form.submit()"/>
+                              {else}
+                              <input type="checkbox" name="{$key1}" value="TRUE" onchange="this.form.submit()"/>
+                              {/if}
+                              {$value1['options']['label']}
+                           </label>
+                        </div>
+                     </div>
+                     {/if}
                   {/loop}
 
                   <!-- Order by selector -->
                   <div class="col-sm-2 pull-right">
-                     <div class="input-group">
-                        <div class="input-group-addon">
-                           <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
-                        </div>
-                        <select name="order" class="form-control" onchange="this.form.submit()">
+                     <div class="btn-group pull-right">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuOrder" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                          {$fsc->orderby[$fsc->selected_orderby]['icon']}
+                          &nbsp;
+                          {$fsc->orderby[$fsc->selected_orderby]['label']}
+                          <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuOrder">
                            {loop="$fsc->orderby"}
-                           <option value="{$value1}" {if="$fsc->selected_orderby==$value1"} selected=""{/if}>{$key1}</option>
+                           <li>
+                              <a href="{$fsc->url()}&order={$key1}">
+                                 {$value1['icon']} &nbsp; {$value1['label']} &nbsp;
+                                 {if="$fsc->selected_orderby==$key1"}<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{/if}
+                              </a>
+                           </li>
                            {/loop}
-                        </select>
+                        </ul>
                      </div>
-                  </div>                        
+                  </div>
                </div>
             </div>
          </form>
@@ -118,9 +165,9 @@
                <tr>
                   {loop="$fsc->fields"}
                   {if="$value2['display']!='none'"}
-                  <td class="text-{$value2['display']}">{$value1[$value2['field']]}</th>
+                  <td class="text-{$value2['display']}">{$value1->$value2['field']}</th>
                      {/if}
-                     {/loop}                        
+                     {/loop}
                </tr>
                {else}
                <tr class="warning">
@@ -156,11 +203,11 @@
       {loop="$fsc->extensions"}
       {if="$value1->type=='tab'"}
       <div role="tabpanel" class="tab-pane" id="ext_{$value1->name}">
-         <iframe src="index.php?page={$value1->from}{$value1->params}" 
+         <iframe src="index.php?page={$value1->from}{$value1->params}"
                  width="100%" height="2000" frameborder="0"></iframe>
       </div>
       {/if}
-      {/loop}        
+      {/loop}
    </div>
 </div>
 

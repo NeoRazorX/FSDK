@@ -73,11 +73,11 @@ abstract class fs_standard_model extends \fs_model {
     * ----------------- */
 
    protected function add_keyfield($fieldname) {
-      return array_push($this->key_fields, $fieldname);
+      $this->key_fields[] = $fieldname;
    }
 
    protected function add_requiredfield($fieldname) {
-      return array_push($this->required_fields, $fieldname);
+      $this->required_fields[] = $fieldname;
    }
 
    protected function test() {
@@ -93,14 +93,6 @@ abstract class fs_standard_model extends \fs_model {
 
       $this->fields_key = [];
       $this->required_fields = [];
-   }
-
-   public function __get($name) {
-      return $this->$name;
-   }
-
-   public function __set($name, $value) {
-      $this->$name = $value;
    }
 
    public function exists() {
@@ -136,76 +128,6 @@ abstract class fs_standard_model extends \fs_model {
 
          $this->db->exec($sql);
       }
-   }
-
-}
-
-/**
- * TEST: To compare with template model generated
- */
-class test_template extends fs_standard_model {
-
-   private $field1;
-   private $field2;
-
-   /* -----------------
-    * P R O T E C T E D
-    * ----------------- */
-
-   protected function test() {
-      /*
-        PUT HERE MODEL DATA VALIDATIONS
-        EXAMPLE:
-        if($this->field_Numeric == 0) {
-        $this->new_error_msg('Must be inform a code value');
-        return FALSE;
-        }
-        return TRUE;
-       */
-      return parent::test();
-   }
-
-   protected function update() {
-      $sql = '';
-      return $this->db->exec($sql);
-   }
-
-   protected function insert() {
-      $sql = '';
-      return $this->db->exec($sql);
-   }
-
-   /* -----------
-    * P U B L I C
-    * ----------- */
-
-   public function __construct($data = FALSE) {
-      parent::__construct('test_template');
-
-      $this->add_keyfield('field1');
-
-      if ($data)
-         $this->load_from_data($data);
-      else
-         $this->clear();
-   }
-
-   public function clear() {
-      $this->field1 = '';
-      $this->field2 = '';
-   }
-
-   public function load_from_data($data) {
-      $this->field1 = $data['field1'];
-      $this->field2 = $data['field2'];
-   }
-
-   public function exists() {
-      return parent::exists();
-   }
-
-   public function install() {
-      return '';
    }
 
 }
