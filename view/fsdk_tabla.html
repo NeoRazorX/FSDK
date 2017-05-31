@@ -36,9 +36,16 @@
          <i class="fa fa-file-excel-o" aria-hidden="true"></i> model/table/{$fsc->tabla}.xml
       </a>
    </li>
+
    <li role="presentation">
       <a href="#modelo" aria-controls="modelo" role="tab" data-toggle="tab">
          <i class="fa fa-file-code-o" aria-hidden="true"></i> model/{$fsc->nombre_modelo}.php
+      </a>
+   </li>
+
+   <li role="presentation">
+      <a href="#controlador" aria-controls="controlador" role="tab" data-toggle="tab">
+         <i class="fa fa-code" aria-hidden="true"></i> controller/{$fsc->tabla}.php
       </a>
    </li>
 </ul>
@@ -74,6 +81,7 @@
          </div>
       </div>
    </div>
+   
    <div role="tabpanel" class="tab-pane" id="modelo">
       <div class="container-fluid">
          <div class="row">
@@ -95,6 +103,32 @@
                <br/>
                <div class="form-group">
                   <textarea id='txt_modelo' class="form-control" rows="40">{$fsc->modelo}</textarea>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div role="tabpanel" class="tab-pane" id="controlador">
+      <div class="container-fluid">
+         <div class="row">
+            <div class="col-sm-10">
+               <p class="help-block">
+                  Esta clase sirve para comunicarse entre el modelo y la vista.
+                  Recuerda ponerlo en el directorio <b>controller</b> del plugin.
+               </p>
+            </div>
+            <div class="col-sm-2 text-right">
+               <button class="btn btn-sm btn-default" data-clipboard-target="#txt_controlador">
+                  <span class="glyphicon glyphicon-scissors" aria-hidden="true"></span>&nbsp; Copiar
+               </button>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <br/>
+               <div class="form-group">
+                  <textarea id='txt_controlador' class="form-control" rows="40">{$fsc->controlador}</textarea>
                </div>
             </div>
          </div>
