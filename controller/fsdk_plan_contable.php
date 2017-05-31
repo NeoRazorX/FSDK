@@ -42,6 +42,7 @@ class fsdk_plan_contable extends fs_controller {
    public function __construct() {
       parent::__construct(__CLASS__, 'Plan contable', 'admin', FALSE, FALSE);
    }
+<<<<<<< HEAD
 
    protected function private_core() {
       $this->codejercicio = FALSE;
@@ -61,7 +62,40 @@ class fsdk_plan_contable extends fs_controller {
             $this->procesar_csv();
          } else {
             $this->new_error_msg('Error al subir el archivo.');
+=======
+   
+   protected function private_core()
+   {
+      if( class_exists('subcuenta') )
+      {
+         $this->codejercicio = FALSE;
+         $this->cuenta = new cuenta();
+         $this->ejercicio = new ejercicio();
+         $this->epigrafe = new epigrafe();
+         $this->separador = ';';
+         $this->subcuenta = new subcuenta();
+         $this->ultima_cuenta = NULL;
+         $this->ultimo_epigrafe = NULL;
+         
+         if( isset($_POST['csv']) )
+         {
+            $this->codejercicio = $_POST['codejercicio'];
+            $this->separador = $_POST['separador'];
+            
+            if( is_uploaded_file($_FILES['fcsv']['tmp_name']) )
+            {
+               $this->procesar_csv();
+            }
+            else
+            {
+               $this->new_error_msg('Error al subir el archivo.');
+            }
+>>>>>>> NeoRazorX/master
          }
+      }
+      else
+      {
+         $this->new_message('Activa el plugin facturacion_base.');
       }
    }
 

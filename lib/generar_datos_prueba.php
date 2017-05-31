@@ -508,7 +508,84 @@ class generar_datos_prueba {
             $cliente->codgrupo = NULL;
 
          $cliente->codcliente = $cliente->get_new_codigo();
+<<<<<<< HEAD
          if (!$cliente->save())
+=======
+         if( $cliente->save() )
+         {
+            $num++;
+            
+            /// añadimos direcciones
+            $num_dirs = mt_rand(0, 3);
+            while($num_dirs > 0)
+            {
+               $dir = new direccion_cliente();
+               $dir->codcliente = $cliente->codcliente;
+               $dir->codpais = $this->empresa->codpais;
+               
+               if( mt_rand(0, 2) == 0 )
+               {
+                  $dir->codpais = $this->paises[0]->codpais;
+               }
+               
+               $dir->provincia = $this->provincia();
+               $dir->ciudad = $this->ciudad();
+               $dir->direccion = $this->direccion();
+               $dir->codpostal = mt_rand(1234, 99999);
+               
+               if( mt_rand(0, 3) == 0 )
+               {
+                  $dir->apartado = mt_rand(1234, 99999);
+               }
+               
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
+               {
+                  $dir->domenvio = FALSE;
+               }
+               
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
+               {
+                  $dir->domfacturacion = FALSE;
+               }
+               
+               $dir->descripcion = 'Dirección #'.$num_dirs;
+               $dir->save();
+               $num_dirs--;
+            }
+            
+            /// Añadimos cuentas bancarias
+            $num_cuentas = mt_rand(0, 3);
+            while($num_cuentas > 0)
+            {
+               $cuenta = new cuenta_banco_cliente();
+               $cuenta->codcliente = $cliente->codcliente;
+               $cuenta->descripcion = 'Banco '.mt_rand(1, 999);
+               $cuenta->iban = 'ES'.mt_rand(10, 99).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '
+                       .mt_rand(1000, 9999).' '.mt_rand(1000, 9999).' '.mt_rand(1000, 9999);
+               $cuenta->swift = $this->random_string(8);
+               
+               $opcion = mt_rand(0, 2);
+               if($opcion == 0)
+               {
+                  $cuenta->swift = '';
+               }
+               else if($opcion == 1)
+               {
+                  $cuenta->iban = '';
+               }
+               
+               if( mt_rand(0, 1) == 0 )
+               {
+                  $cuenta->fmandato = date( 'd-m-Y', strtotime($cliente->fechaalta.' +'.mt_rand(1, 30).' days') );
+               }
+               
+               $cuenta->save();
+               $num_cuentas--;
+            }
+         }
+         else
+         {
+>>>>>>> NeoRazorX/master
             break;
 
          /// añadimos direcciones
@@ -629,8 +706,14 @@ class generar_datos_prueba {
                if (mt_rand(0, 3) == 0) {
                   $dir->apartado = mt_rand(1234, 99999);
                }
+<<<<<<< HEAD
 
                if (mt_rand(0, 1) == 0) {
+=======
+               
+               if( $num_dirs != 1 AND mt_rand(0, 1) == 0 )
+               {
+>>>>>>> NeoRazorX/master
                   $dir->direccionppal = FALSE;
                }
 
