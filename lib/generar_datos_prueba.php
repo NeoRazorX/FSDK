@@ -63,9 +63,32 @@ class generar_datos_prueba {
    protected $series;
    protected $users;
 
-   /* -------------
-    * P R I V A T E
-    * ------------- */
+   /**
+    * Constructor. Inicializamos todo lo necesario, y randomizamos.
+    * @param fs_db2 $db
+    * @param empresa $empresa
+    */
+   public function __construct(&$db, &$empresa) {
+      $this->db = $db;
+      $this->empresa = $empresa;
+      $this->ejercicio = new ejercicio();
+      $this->_loaddata($this->agentes, new agente(), TRUE);
+      $this->_loaddata($this->almacenes, new almacen(), TRUE);
+      $this->_loaddata($this->divisas, new divisa(), TRUE);
+      $this->_loaddata($this->formas_pago, new forma_pago(), TRUE);
+
+      if (class_exists('impuesto')) {
+         $this->_loaddata($this->grupos, new grupo_clientes(), FALSE);
+         $this->_loaddata($this->impuestos, new impuesto(), TRUE);
+      } else {
+         $this->grupos = array();
+         $this->impuestos = array();
+      }
+
+      $this->_loaddata($this->paises, new pais(), TRUE);
+      $this->_loaddata($this->series, new serie(), TRUE);
+      $this->_loaddata($this->users, new fs_user(), FALSE);
+   }
 
    /**
     * Metodo de apoyo para el constructor de modelos e inicializacion de datos
@@ -75,13 +98,10 @@ class generar_datos_prueba {
     */
    private function _loaddata(&$variable, $modelo, $shuffle) {
       $variable = $modelo->all();
-      if ($shuffle)
+      if ($shuffle) {
          shuffle($variable);
+      }
    }
-
-   /* -----------------
-    * P R O T E C T E D
-    * ----------------- */
 
    /**
     * Acorta un string hasta $len y sustituye caracteres especiales.
@@ -90,12 +110,12 @@ class generar_datos_prueba {
     * @param int $len
     * @return string
     */
-   protected function txt2codigo($txt, $len = 8)
-   {
-      $result = str_replace( array(' ','-','_','&','ó',':','ñ','"',"'",'*'), array('','','','','O','','N','','','-'), strtoupper($txt));
+   protected function txt2codigo($txt, $len = 8) {
+      $result = str_replace(array(' ', '-', '_', '&', 'ó', ':', 'ñ', '"', "'", '*'), array('', '', '', '', 'O', '', 'N', '', '', '-'), strtoupper($txt));
 
-      if (strlen($result) > $len)
-         $result = substr($result, 0, $len - 1).mt_rand(0, 9);
+      if (strlen($result) > $len) {
+         $result = substr($result, 0, $len - 1) . mt_rand(0, 9);
+      }
 
       return $result;
    }
@@ -209,37 +229,6 @@ class generar_datos_prueba {
       return $precio;
    }
 
-   /* -----------
-    * P U B L I C
-    * ----------- */
-
-   /**
-    * Constructor. Inicializamos todo lo necesario, y randomizamos.
-    * @param fs_db2 $db
-    * @param empresa $empresa
-    */
-   public function __construct(&$db, &$empresa) {
-      $this->db = $db;
-      $this->empresa = $empresa;
-      $this->ejercicio = new ejercicio();
-      $this->_loaddata($this->agentes, new agente(), TRUE);
-      $this->_loaddata($this->almacenes, new almacen(), TRUE);
-      $this->_loaddata($this->divisas, new divisa(), TRUE);
-      $this->_loaddata($this->formas_pago, new forma_pago(), TRUE);
-
-      if (class_exists('impuesto')) {
-         $this->_loaddata($this->grupos, new grupo_clientes(), FALSE);
-         $this->_loaddata($this->impuestos, new impuesto(), TRUE);
-      } else {
-         $this->grupos = array();
-         $this->impuestos = array();
-      }
-
-      $this->_loaddata($this->paises, new pais(), TRUE);
-      $this->_loaddata($this->series, new serie(), TRUE);
-      $this->_loaddata($this->users, new fs_user(), FALSE);
-   }
-
    /**
     * Genera $max fabricantes aleatorios.
     * Devuelve el número de fabricantes generados.
@@ -251,8 +240,9 @@ class generar_datos_prueba {
       for ($num = 0; $num < $max; ++$num) {
          $fabri->nombre = $this->empresa();
          $fabri->codfabricante = $this->txt2codigo($fabri->nombre);
-         if (!$fabri->save())
+         if (!$fabri->save()) {
             break;
+         }
       }
 
       return $num;
@@ -319,10 +309,11 @@ class generar_datos_prueba {
 
             case 1:
                $aux = explode(':', $art->descripcion);
-               if ($aux)
+               if ($aux) {
                   $art->referencia = $this->txt2codigo($aux[0], 18);
-               else
+               } else {
                   $art->referencia = $art->get_new_referencia();
+               }
                break;
 
             default:
@@ -343,14 +334,16 @@ class generar_datos_prueba {
          $art->secompra = (mt_rand(0, 9) != 0);
          $art->sevende = (mt_rand(0, 9) != 0);
 
-         if (!$art->save())
+         if (!$art->save()) {
             break;
+         }
 
          shuffle($this->almacenes);
-         if (mt_rand(0, 2) == 0)
+         if (mt_rand(0, 2) == 0) {
             $art->sum_stock($this->almacenes[0]->codalmacen, mt_rand(0, 1000));
-         else
+         } else {
             $art->sum_stock($this->almacenes[0]->codalmacen, mt_rand(0, 20));
+         }
       }
 
       return $num;
@@ -368,13 +361,15 @@ class generar_datos_prueba {
          $agente->f_nacimiento = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(1970, 1997));
          $agente->f_alta = date(mt_rand(1, 28) . '-' . mt_rand(1, 12) . '-' . mt_rand(2013, 2016));
 
-         if (mt_rand(0, 24) == 0)
+         if (mt_rand(0, 24) == 0) {
             $agente->f_baja = date('d-m-Y');
+         }
 
-         if (mt_rand(0, 9) == 0)
+         if (mt_rand(0, 9) == 0) {
             $agente->dnicif = '';
-         else
+         } else {
             $agente->dnicif = mt_rand(0, 99999999);
+         }
 
          $agente->nombre = $this->nombre();
          $agente->apellidos = $this->apellidos();
@@ -383,11 +378,13 @@ class generar_datos_prueba {
          $agente->direccion = $this->direccion();
          $agente->codpostal = mt_rand(11111, 99999);
 
-         if (mt_rand(0, 1) == 0)
+         if (mt_rand(0, 1) == 0) {
             $agente->telefono = mt_rand(555555555, 999999999);
+         }
 
-         if (mt_rand(0, 2) > 0)
+         if (mt_rand(0, 2) > 0) {
             $agente->email = $this->email();
+         }
 
          if (mt_rand(0, 2) > 0) {
             $cargos = array('Gerente', 'CEO', 'Compras', 'Comercial', 'Técnico', 'Freelance', 'Becario', 'Becario Senior');
@@ -395,19 +392,22 @@ class generar_datos_prueba {
             $agente->cargo = $cargos[0];
          }
 
-         if (mt_rand(0, 1) == 0)
+         if (mt_rand(0, 1) == 0) {
             $agente->seg_social = mt_rand(111111, 9999999999);
+         }
 
          if (mt_rand(0, 5) == 0) {
             $agente->banco = 'ES' . mt_rand(10, 99) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' '
-                . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999);
+                    . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999);
          }
 
-         if (mt_rand(0, 5) == 0)
+         if (mt_rand(0, 5) == 0) {
             $agente->porcomision = $this->cantidad(0, 5, 20);
+         }
 
-         if (!$agente->save())
+         if (!$agente->save()) {
             break;
+         }
       }
 
       return $num;
@@ -430,9 +430,10 @@ class generar_datos_prueba {
       for ($num = 0; $num < $max; ++$num) {
          $grupo->codgrupo = $grupo->get_new_codigo();
          $grupo->nombre = $nombres[mt_rand(0, $max_nombres)] . ' '
-             . $nombres2[mt_rand(0, $max_nombres2)] . ' ' . $num;
-         if (!$grupo->save())
+                 . $nombres2[mt_rand(0, $max_nombres2)] . ' ' . $num;
+         if (!$grupo->save()) {
             break;
+         }
       }
 
       return $num;
@@ -488,18 +489,21 @@ class generar_datos_prueba {
          if (mt_rand(0, 2) > 0) {
             shuffle($this->agentes);
             $cliente->codagente = $this->agentes[0]->codagente;
-         } else
+         } else {
             $cliente->codagente = NULL;
+         }
 
          if (mt_rand(0, 2) > 0 AND $this->grupos) {
             shuffle($this->grupos);
             $cliente->codgrupo = $this->grupos[0]->codgrupo;
-         } else
+         } else {
             $cliente->codgrupo = NULL;
+         }
 
          $cliente->codcliente = $cliente->get_new_codigo();
-         if (!$cliente->save())
+         if (!$cliente->save()) {
             break;
+         }
 
          /// añadimos direcciones
          $num_dirs = mt_rand(0, 3);
@@ -518,8 +522,9 @@ class generar_datos_prueba {
             $dir->domfacturacion = (mt_rand(0, 1) === 1);
 
             $dir->descripcion = 'Dirección #' . $num_dirs;
-            if (!$dir->save())
+            if (!$dir->save()) {
                break;
+            }
 
             $num_dirs--;
          }
@@ -540,8 +545,9 @@ class generar_datos_prueba {
 
             $cuenta->fmandato = (mt_rand(0, 1) == 0) ? date('d-m-Y', strtotime($cliente->fechaalta . ' +' . mt_rand(1, 30) . ' days')) : NULL;
 
-            if (!$cuenta->save())
+            if (!$cuenta->save()) {
                break;
+            }
 
             $num_cuentas--;
          }
@@ -640,7 +646,7 @@ class generar_datos_prueba {
                $cuenta->codproveedor = $proveedor->codproveedor;
                $cuenta->descripcion = 'Banco ' . mt_rand(1, 999);
                $cuenta->iban = 'ES' . mt_rand(10, 99) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' '
-                   . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999);
+                       . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999) . ' ' . mt_rand(1000, 9999);
                $cuenta->swift = $this->random_string(8);
 
                $opcion = mt_rand(0, 2);

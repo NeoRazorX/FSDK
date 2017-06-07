@@ -24,52 +24,6 @@ class xml_from_table {
    private $table;
    private $xml;
 
-   /* ---------------
-    *  P R I V A T E
-    * --------------- */
-
-   private function xml_header() {
-      return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-          . "<!--\n"
-          . "   Document   : " . $this->table . ".xml\n"
-          . "   Description:\n"
-          . "        Estructura de la tabla " . $this->table . ".\n"
-          . "-->\n"
-          . "<tabla>\n"
-          . "</tabla>\n";
-   }
-
-   private function add_field($node, $column) {
-      if (isset($column['character_maximum_length']))
-         $node->addChild('tipo', $column['data_type'] . '(' . $column['character_maximum_length'] . ')');
-      else
-         $node->addChild('tipo', $column['data_type']);
-
-      if ($column['is_nullable'] == 'YES')
-         $node->addChild('nulo', 'YES');
-      else
-         $node->addChild('nulo', 'NO');
-
-      if (isset($column['column_default']))
-         $node->addChild('defecto', $column['column_default']);
-   }
-
-   private function add_serial_field($node, $column) {
-      $node->addChild('tipo', 'serial');
-      $node->addChild('nulo', 'NO');
-      $node->addChild('defecto', "nextval('" . $this->table . '_' . $column['column_name'] . "_seq'::regclass)");
-   }
-
-   private function add_constrain($name, $value) {
-      $node = $this->xml->addChild('restriccion');
-      $node->addChild('nombre', $name);
-      $node->addChild('consulta', $value);
-   }
-
-   /* -------------
-    *  P U B L I C
-    * ------------- */
-
    public function __construct($database, $table) {
       $this->database = $database;
       $this->table = $table;
@@ -80,19 +34,17 @@ class xml_from_table {
       $columns = $this->database->get_columns($this->table);
       foreach ($columns as $column) {
          $node = $this->xml->addChild('columna');
-         $node->addChild('nombre', $column['column_name']);
+         $node->addChild('nombre', $column['name']);
 
          /// comprobamos si es auto_increment
-         $auto_increment = (isset($column['extra'])
-             AND ( $column['extra'] === 'auto_increment'));
-
+         $auto_increment = (isset($column['extra']) AND ( $column['extra'] === 'auto_increment'));
          if ($auto_increment) {
             $this->add_serial_field($node, $column);
             continue;
          }
 
          /// comprobamos si es tipo serial
-         if ($column['data_type'] == 'integer' AND $column['column_default'] == "nextval('" . $this->table . '_' . $column['column_name'] . "_seq'::regclass)") {
+         if ($column['type'] == 'integer' AND $column['default'] == "nextval('" . $this->table . '_' . $column['name'] . "_seq'::regclass)") {
             $this->add_serial_field($node, $column);
             continue;
          }
@@ -103,44 +55,42 @@ class xml_from_table {
    }
 
    public function add_constrains() {
-      $constrains = $this->database->get_constraints($this->table);
-      $primary_fields = [];
+      $constrains = $this->database->get_constraints($this->table, TRUE);
+      $primary_fields = array();
+      $uniques = array();
 
       foreach ($constrains as $column) {
-         switch ($column['tipo']) {
+         switch ($column['type']) {
             case 'PRIMARY KEY':
-            case 'p': {
-                  array_push($primary_fields, $column['column_name']);
-                  break;
-               }
+               $primary_fields[] = $column['column_name'];
+               break;
 
             case 'FOREIGN KEY':
-            case 'f': {
-                  $fk = 'FOREIGN KEY (' . $column['column_name'] . ')'
-                      . ' REFERENCES ' . $column['foreign_table_name'] . '(' . $column['foreign_column_name'] . ')'
-                      . ' ON DELETE ' . $column['on_delete']
-                      . ' ON UPDATE ' . $column['on_update'];
-                  $this->add_constrain($column['restriccion'], $fk);
-                  break;
-               }
+               $fk = 'FOREIGN KEY (' . $column['column_name'] . ')'
+                       . ' REFERENCES ' . $column['foreign_table_name'] . ' (' . $column['foreign_column_name'] . ')'
+                       . ' ON DELETE ' . $column['on_delete']
+                       . ' ON UPDATE ' . $column['on_update'];
+               $this->add_constrain($column['name'], $fk);
+               break;
 
-            case 'u': {
-                  $this->add_constrain($column['restriccion'], 'UNIQUE (...)');
-                  break;
-               }
+            case 'UNIQUE':
+               $uniques[$column['name']][] = $column['column_name'];
+               break;
 
-            default: {
-                  $this->add_constrain($column['restriccion'], '...');
-                  break;
-               }
+            default:
+               $this->add_constrain($column['name'], '...');
+               break;
          }
       }
 
       // Add Primary Keys
-      if (!empty($primary_fields))
-         $this->add_constrain(
-             $this->table . '_pkey', 'PRIMARY KEY (' . implode(",", $primary_fields) . ')'
-         );
+      if ($primary_fields) {
+         $this->add_constrain($this->table . '_pkey', 'PRIMARY KEY (' . join(',', $primary_fields) . ')');
+      }
+      
+      foreach($uniques as $key => $value) {
+         $this->add_constrain($key, 'UNIQUE (' . join(',', $value) . ')');
+      }
    }
 
    public function read() {
@@ -152,6 +102,49 @@ class xml_from_table {
 
       // devolvemos el contenido del XML
       return $doc->saveXML();
+   }
+
+   private function xml_header() {
+      return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+              . "<!--\n"
+              . "   Document   : " . $this->table . ".xml\n"
+              . "   Description:\n"
+              . "        Estructura de la tabla " . $this->table . ".\n"
+              . "-->\n"
+              . "<tabla>\n"
+              . "</tabla>\n";
+   }
+
+   private function add_field($node, $column) {
+      if (substr($column['type'], 0, 3) == 'int') {
+         $node->addChild('tipo', 'integer');
+      } else if (substr($column['type'], 0, 7) == 'tinyint') {
+         $node->addChild('tipo', 'boolean');
+      } else {
+         $node->addChild('tipo', $column['type']);
+      }
+
+      if ($column['is_nullable'] == 'YES') {
+         $node->addChild('nulo', 'YES');
+      } else {
+         $node->addChild('nulo', 'NO');
+      }
+
+      if (isset($column['column_default'])) {
+         $node->addChild('defecto', $column['column_default']);
+      }
+   }
+
+   private function add_serial_field($node, $column) {
+      $node->addChild('tipo', 'serial');
+      $node->addChild('nulo', 'NO');
+      $node->addChild('defecto', "nextval('" . $this->table . '_' . $column['name'] . "_seq'::regclass)");
+   }
+
+   private function add_constrain($name, $value) {
+      $node = $this->xml->addChild('restriccion');
+      $node->addChild('nombre', $name);
+      $node->addChild('consulta', $value);
    }
 
 }

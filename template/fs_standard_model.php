@@ -31,68 +31,11 @@ abstract class fs_standard_model extends \fs_model {
    protected $key_fields;
    protected $required_fields;
 
-   abstract protected function update();
-
-   abstract protected function insert();
-
-   abstract public function load_from_data($data);
-
-   abstract public function clear();
-
-   /* -------------
-    * P R I V A T E 
-    * ------------- */
-
-   private function test_keyfields() {
-      $result = TRUE;
-      foreach ($this->key_fields as $key_field) {
-         if (empty($this->$key_field)) {
-            $result = FALSE;
-            break;
-         }
-      }
-
-      return $result;
-   }
-
-   private function test_requiredfields() {
-      $result = $this->test_keyfields();
-      if ($result)
-         foreach ($this->required_fields as $field) {
-            if (empty($this->$field)) {
-               $result = FALSE;
-               break;
-            }
-         }
-
-      return $result;
-   }
-
-   /* -----------------
-    * P R O T E C T E D
-    * ----------------- */
-
-   protected function add_keyfield($fieldname) {
-      return array_push($this->key_fields, $fieldname);
-   }
-
-   protected function add_requiredfield($fieldname) {
-      return array_push($this->required_fields, $fieldname);
-   }
-
-   protected function test() {
-      return $this->test_requiredfields();
-   }
-
-   /* -----------
-    * P U B L I C
-    * ----------- */
-
    public function __construct($name = '') {
       parent::__construct($name);
 
-      $this->fields_key = [];
-      $this->required_fields = [];
+      $this->fields_key = array();
+      $this->required_fields = array();
    }
 
    public function __get($name) {
@@ -119,12 +62,14 @@ abstract class fs_standard_model extends \fs_model {
       if ($this->test()) {
          $this->clean_cache();
 
-         if ($this->exists())
+         if ($this->exists()) {
             return $this->update();
-         else
+         } else {
             return $this->insert();
-      } else
+         }
+      } else {
          return FALSE;
+      }
    }
 
    public function delete() {
@@ -138,6 +83,51 @@ abstract class fs_standard_model extends \fs_model {
       }
    }
 
+   abstract protected function update();
+
+   abstract protected function insert();
+
+   abstract public function load_from_data($data);
+
+   abstract public function clear();
+
+   private function test_keyfields() {
+      $result = TRUE;
+      foreach ($this->key_fields as $key_field) {
+         if (empty($this->$key_field)) {
+            $result = FALSE;
+            break;
+         }
+      }
+
+      return $result;
+   }
+
+   private function test_requiredfields() {
+      $result = $this->test_keyfields();
+      if ($result)
+         foreach ($this->required_fields as $field) {
+            if (empty($this->$field)) {
+               $result = FALSE;
+               break;
+            }
+         }
+
+      return $result;
+   }
+
+   protected function add_keyfield($fieldname) {
+      return array_push($this->key_fields, $fieldname);
+   }
+
+   protected function add_requiredfield($fieldname) {
+      return array_push($this->required_fields, $fieldname);
+   }
+
+   protected function test() {
+      return $this->test_requiredfields();
+   }
+
 }
 
 /**
@@ -148,9 +138,16 @@ class test_template extends fs_standard_model {
    private $field1;
    private $field2;
 
-   /* -----------------
-    * P R O T E C T E D
-    * ----------------- */
+   public function __construct($data = FALSE) {
+      parent::__construct('test_template');
+
+      $this->add_keyfield('field1');
+
+      if ($data)
+         $this->load_from_data($data);
+      else
+         $this->clear();
+   }
 
    protected function test() {
       /*
@@ -173,21 +170,6 @@ class test_template extends fs_standard_model {
    protected function insert() {
       $sql = '';
       return $this->db->exec($sql);
-   }
-
-   /* -----------
-    * P U B L I C
-    * ----------- */
-
-   public function __construct($data = FALSE) {
-      parent::__construct('test_template');
-
-      $this->add_keyfield('field1');
-
-      if ($data)
-         $this->load_from_data($data);
-      else
-         $this->clear();
    }
 
    public function clear() {
