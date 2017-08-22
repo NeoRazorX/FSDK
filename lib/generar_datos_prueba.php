@@ -879,7 +879,7 @@ class generar_datos_prueba {
             $alb->dtopor5 = $this->cantidad(0, 5, 4);
          }
          $tot_descuentos = array($alb->dtopor1,$alb->dtopor2,$alb->dtopor3,$alb->dtopor4,$alb->dtopor5);
-         $desc = $this->calcDUE($tot_descuentos);
+         $desc = $this->calc_due($tot_descuentos);
          
          $eje = $this->ejercicio->get_by_fecha($alb->fecha);
          if ($eje) {
@@ -977,7 +977,7 @@ class generar_datos_prueba {
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
                   $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calcDUE($lin_descuentos);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
                      if (isset($articulos[$numlineas])) {
@@ -1237,7 +1237,7 @@ class generar_datos_prueba {
             $ped->dtopor5 = $this->cantidad(0, 5, 4);
          }
          $tot_descuentos = array($ped->dtopor1,$ped->dtopor2,$ped->dtopor3,$ped->dtopor4,$ped->dtopor5);
-         $desc = $this->calcDUE($tot_descuentos);
+         $desc = $this->calc_due($tot_descuentos);
          
          if (mt_rand(0, 5) == 0) {
             $ped->status = 2;
@@ -1336,7 +1336,7 @@ class generar_datos_prueba {
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
                   $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calcDUE($lin_descuentos);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
                      $pvpcondto = $lin->pvptotal * $desc;
@@ -1581,7 +1581,7 @@ class generar_datos_prueba {
             $presu->dtopor5 = $this->cantidad(0, 5, 4);
          }
          $tot_descuentos = array($presu->dtopor1,$presu->dtopor2,$presu->dtopor3,$presu->dtopor4,$presu->dtopor5);
-         $desc = $this->calcDUE($tot_descuentos);
+         $desc = $this->calc_due($tot_descuentos);
          
          $eje = $this->ejercicio->get_by_fecha($presu->fecha);
          if ($eje) {
@@ -1674,7 +1674,7 @@ class generar_datos_prueba {
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
                   $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calcDUE($lin_descuentos);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
                      $pvpcondto = $lin->pvptotal * $desc;
@@ -2031,9 +2031,9 @@ class generar_datos_prueba {
      * @param array $descuentos contiene un array de float.
      * @return float
      */
-    public function calcDUE($descuentos)
+    public function calc_due($descuentos)
     {
-        return (1 - $this->caclDescDUE($descuentos) / 100);
+        return (1 - $this->calc_desc_due($descuentos) / 100);
     }
     
     /**
@@ -2043,7 +2043,7 @@ class generar_datos_prueba {
      * @param array $descuentos contiene un array de float.
      * @return float
      */
-    public function caclDescDUE($descuentos)
+    public function calc_desc_due($descuentos)
     {
         $dto = 1;
         foreach($descuentos as $descuento) {
