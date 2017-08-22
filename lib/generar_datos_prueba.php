@@ -863,6 +863,24 @@ class generar_datos_prueba {
             $alb->codagente = NULL;
          }
 
+         if (mt_rand(0, 4) == 0) {
+            $alb->dtopor1 = $this->cantidad(0, 33, 100);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $alb->dtopor2 = $this->cantidad(0, 10, 15);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $alb->dtopor3 = $this->cantidad(0, 7, 8);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $alb->dtopor4 = $this->cantidad(0, 5, 4);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $alb->dtopor5 = $this->cantidad(0, 5, 4);
+         }
+         $tot_descuentos = array($alb->dtopor1,$alb->dtopor2,$alb->dtopor3,$alb->dtopor4,$alb->dtopor5);
+         $desc = $this->calc_due($tot_descuentos);
+         
          $eje = $this->ejercicio->get_by_fecha($alb->fecha);
          if ($eje) {
             $alb->codejercicio = $eje->codejercicio;
@@ -947,30 +965,36 @@ class generar_datos_prueba {
                   if (mt_rand(0, 4) == 0) {
                      $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor2 = $this->cantidad(0, 10, 15);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor3 = $this->cantidad(0, 7, 8);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor4 = $this->cantidad(0, 5, 4);
+                  }
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * (100 - $lin->dtopor) / 100;
+                  $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
                      if (isset($articulos[$numlineas])) {
                         /// descontamos del stock
                         $articulos[$numlineas]->sum_stock($alb->codalmacen, 0 - $lin->cantidad);
                      }
-
-                     $alb->neto += $lin->pvptotal;
-                     $alb->totaliva += ($lin->pvptotal * $lin->iva / 100);
-                     $alb->totalirpf += ($lin->pvptotal * $lin->irpf / 100);
-                     $alb->totalrecargo += ($lin->pvptotal * $lin->recargo / 100);
+                     $pvpcondto = $lin->pvptotal * $desc;
+                     $alb->netosindto += $lin->pvptotal;
+                     $alb->neto += $pvpcondto;
+                     $alb->totaliva += $pvpcondto * $lin->iva / 100;
+                     $alb->totalirpf += $pvpcondto * $lin->irpf / 100;
+                     $alb->totalrecargo += $pvpcondto * $lin->recargo / 100;
                   }
 
                   $numlineas--;
                }
 
-               /// redondeamos
-               $alb->neto = round($alb->neto, FS_NF0);
-               $alb->totaliva = round($alb->totaliva, FS_NF0);
-               $alb->totalirpf = round($alb->totalirpf, FS_NF0);
-               $alb->totalrecargo = round($alb->totalrecargo, FS_NF0);
                $alb->total = $alb->neto + $alb->totaliva - $alb->totalirpf + $alb->totalrecargo;
                $alb->save();
 
@@ -1197,6 +1221,24 @@ class generar_datos_prueba {
             $ped->codagente = NULL;
          }
 
+         if (mt_rand(0, 4) == 0) {
+            $ped->dtopor1 = $this->cantidad(0, 33, 100);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $ped->dtopor2 = $this->cantidad(0, 10, 15);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $ped->dtopor3 = $this->cantidad(0, 7, 8);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $ped->dtopor4 = $this->cantidad(0, 5, 4);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $ped->dtopor5 = $this->cantidad(0, 5, 4);
+         }
+         $tot_descuentos = array($ped->dtopor1,$ped->dtopor2,$ped->dtopor3,$ped->dtopor4,$ped->dtopor5);
+         $desc = $this->calc_due($tot_descuentos);
+         
          if (mt_rand(0, 5) == 0) {
             $ped->status = 2;
          }
@@ -1282,25 +1324,32 @@ class generar_datos_prueba {
                   if (mt_rand(0, 4) == 0) {
                      $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor2 = $this->cantidad(0, 10, 15);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor3 = $this->cantidad(0, 7, 8);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor4 = $this->cantidad(0, 5, 4);
+                  }
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * (100 - $lin->dtopor) / 100;
+                  $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
-                     $ped->neto += $lin->pvptotal;
-                     $ped->totaliva += ($lin->pvptotal * $lin->iva / 100);
-                     $ped->totalirpf += ($lin->pvptotal * $lin->irpf / 100);
-                     $ped->totalrecargo += ($lin->pvptotal * $lin->recargo / 100);
+                     $pvpcondto = $lin->pvptotal * $desc;
+                     $ped->netosindto += $lin->pvptotal;
+                     $ped->neto += $pvpcondto;
+                     $ped->totaliva += $pvpcondto * $lin->iva / 100;
+                     $ped->totalirpf += $pvpcondto * $lin->irpf / 100;
+                     $ped->totalrecargo += $pvpcondto * $lin->recargo / 100;
                   }
 
                   $numlineas--;
                }
 
-               /// redondeamos
-               $ped->neto = round($ped->neto, FS_NF0);
-               $ped->totaliva = round($ped->totaliva, FS_NF0);
-               $ped->totalirpf = round($ped->totalirpf, FS_NF0);
-               $ped->totalrecargo = round($ped->totalrecargo, FS_NF0);
                $ped->total = $ped->neto + $ped->totaliva - $ped->totalirpf + $ped->totalrecargo;
                $ped->save();
 
@@ -1516,6 +1565,24 @@ class generar_datos_prueba {
             $presu->codagente = NULL;
          }
 
+         if (mt_rand(0, 4) == 0) {
+            $presu->dtopor1 = $this->cantidad(0, 33, 100);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $presu->dtopor2 = $this->cantidad(0, 10, 15);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $presu->dtopor3 = $this->cantidad(0, 7, 8);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $presu->dtopor4 = $this->cantidad(0, 5, 4);
+         }
+         if (mt_rand(0, 4) == 0) {
+            $presu->dtopor5 = $this->cantidad(0, 5, 4);
+         }
+         $tot_descuentos = array($presu->dtopor1,$presu->dtopor2,$presu->dtopor3,$presu->dtopor4,$presu->dtopor5);
+         $desc = $this->calc_due($tot_descuentos);
+         
          $eje = $this->ejercicio->get_by_fecha($presu->fecha);
          if ($eje) {
             $presu->codejercicio = $eje->codejercicio;
@@ -1595,25 +1662,32 @@ class generar_datos_prueba {
                   if (mt_rand(0, 4) == 0) {
                      $lin->dtopor = $this->cantidad(0, 33, 100);
                   }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor2 = $this->cantidad(0, 10, 15);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor3 = $this->cantidad(0, 7, 8);
+                  }
+                  if (mt_rand(0, 4) == 0) {
+                     $lin->dtopor4 = $this->cantidad(0, 5, 4);
+                  }
 
                   $lin->pvpsindto = ($lin->pvpunitario * $lin->cantidad);
-                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * (100 - $lin->dtopor) / 100;
+                  $lin_descuentos = array($lin->dtopor,$lin->dtopor2,$lin->dtopor3,$lin->dtopor4);
+                  $lin->pvptotal = $lin->pvpunitario * $lin->cantidad * $this->calc_due($lin_descuentos);
 
                   if ($lin->save()) {
-                     $presu->neto += $lin->pvptotal;
-                     $presu->totaliva += ($lin->pvptotal * $lin->iva / 100);
-                     $presu->totalirpf += ($lin->pvptotal * $lin->irpf / 100);
-                     $presu->totalrecargo += ($lin->pvptotal * $lin->recargo / 100);
+                     $pvpcondto = $lin->pvptotal * $desc;
+                     $presu->netosindto += $lin->pvptotal;
+                     $presu->neto += $pvpcondto;
+                     $presu->totaliva += $pvpcondto * $lin->iva / 100;
+                     $presu->totalirpf += $pvpcondto * $lin->irpf / 100;
+                     $presu->totalrecargo += $pvpcondto * $lin->recargo / 100;
                   }
 
                   $numlineas--;
                }
 
-               /// redondeamos
-               $presu->neto = round($presu->neto, FS_NF0);
-               $presu->totaliva = round($presu->totaliva, FS_NF0);
-               $presu->totalirpf = round($presu->totalirpf, FS_NF0);
-               $presu->totalrecargo = round($presu->totalrecargo, FS_NF0);
                $presu->total = $presu->neto + $presu->totaliva - $presu->totalirpf + $presu->totalrecargo;
                $presu->save();
 
@@ -1950,4 +2024,31 @@ class generar_datos_prueba {
       return $lista;
    }
 
+    /**
+     * Devuelve el escalar del descuento unificado equivalente
+     * Por ejemplo: recibe descuentos = [50, 10] y devuelve 0.45
+     * 
+     * @param array $descuentos contiene un array de float.
+     * @return float
+     */
+    public function calc_due($descuentos)
+    {
+        return (1 - $this->calc_desc_due($descuentos) / 100);
+    }
+    
+    /**
+     * Devuelve el descuento unificado equivalente
+     * Por ejemplo: recibe descuentos = [50, 10] y devuelve 55
+     * 
+     * @param array $descuentos contiene un array de float.
+     * @return float
+     */
+    public function calc_desc_due($descuentos)
+    {
+        $dto = 1;
+        foreach($descuentos as $descuento) {
+            $dto *= (1 - $descuento / 100);
+        }
+        return (1 - $dto) * 100;
+    }
 }
