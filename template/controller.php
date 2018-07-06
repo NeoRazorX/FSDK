@@ -23,8 +23,6 @@
  * @author ________
  */
 
-require_model('/*{MODEL}*/.php');
-
 class /*{CONTROLLER}*/ extends fs_standard_controller {
 
    public function __construct() {
