@@ -1,7 +1,7 @@
 <?php
-/*
+/**
  * This file is part of FacturaScripts
- * Copyright (C) 2016-2018  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2016-2018 Carlos Garcia Gomez <neorazorx@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -10,13 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 require_once __DIR__ . '/../lib/generar_datos_prueba.php';
 
 if (!defined('FS_SERVICIOS')) {
@@ -49,7 +48,7 @@ class fsdk_home extends fs_controller
                 case 'fabricantes':
                     if (class_exists('fabricante')) {
                         $num = $gdp->fabricantes();
-                        $this->new_message('Generados ' . $num . ' fabricantes.');
+                        $this->new_message('Generados ' . $num . ' fabricantes.', true);
                     } else {
                         $this->new_error_msg('Instala el plugin facturacion_base.');
                     }
@@ -58,7 +57,7 @@ class fsdk_home extends fs_controller
                 case 'familias':
                     if (class_exists('familia')) {
                         $num = $gdp->familias();
-                        $this->new_message('Generados ' . $num . ' familias.');
+                        $this->new_message('Generadas ' . $num . ' familias.', true);
                     } else {
                         $this->new_error_msg('Instala el plugin facturacion_base.');
                     }
@@ -67,7 +66,7 @@ class fsdk_home extends fs_controller
                 case 'articulos':
                     if (class_exists('articulo')) {
                         $num = $gdp->articulos();
-                        $this->new_message('Generados ' . $num . ' artículos.');
+                        $this->new_message('Generados ' . $num . ' artículos.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=articulos';
@@ -79,14 +78,14 @@ class fsdk_home extends fs_controller
                 case 'gruposcli':
                     if (class_exists('cliente')) {
                         $num = $gdp->grupos_clientes();
-                        $this->new_message('Generados ' . $num . ' grupos de clientes.');
+                        $this->new_message('Generados ' . $num . ' grupos de clientes.', true);
                     }
                     break;
 
                 case 'clientes':
                     if (class_exists('cliente')) {
                         $num = $gdp->clientes();
-                        $this->new_message('Generados ' . $num . ' clientes.');
+                        $this->new_message('Generados ' . $num . ' clientes.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=clientes';
@@ -97,13 +96,13 @@ class fsdk_home extends fs_controller
 
                 case 'agentes':
                     $num = $gdp->agentes();
-                    $this->new_message('Generados ' . $num . ' empleados.');
+                    $this->new_message('Generados ' . $num . ' empleados.', true);
                     break;
 
                 case 'proveedores':
                     if (class_exists('proveedor')) {
                         $num = $gdp->proveedores();
-                        $this->new_message('Generados ' . $num . ' proveedores.');
+                        $this->new_message('Generados ' . $num . ' proveedores.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=proveedores';
@@ -115,7 +114,7 @@ class fsdk_home extends fs_controller
                 case 'presupuestoscli':
                     if (class_exists('presupuesto_cliente')) {
                         $num = $gdp->presupuestoscli();
-                        $this->new_message('Generados ' . $num . ' ' . FS_PRESUPUESTOS . ' de venta.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_PRESUPUESTOS . ' de venta.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=presupuestoscli';
@@ -127,7 +126,7 @@ class fsdk_home extends fs_controller
                 case 'pedidosprov':
                     if (class_exists('pedido_proveedor')) {
                         $num = $gdp->pedidosprov();
-                        $this->new_message('Generados ' . $num . ' ' . FS_PEDIDOS . ' de compra.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_PEDIDOS . ' de compra.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=pedidosprov';
@@ -139,7 +138,7 @@ class fsdk_home extends fs_controller
                 case 'pedidoscli':
                     if (class_exists('pedido_cliente')) {
                         $num = $gdp->pedidoscli();
-                        $this->new_message('Generados ' . $num . ' ' . FS_PEDIDOS . ' de venta.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_PEDIDOS . ' de venta.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=pedidoscli';
@@ -151,7 +150,7 @@ class fsdk_home extends fs_controller
                 case 'albaranesprov':
                     if (class_exists('albaran_proveedor')) {
                         $num = $gdp->albaranesprov();
-                        $this->new_message('Generados ' . $num . ' ' . FS_ALBARANES . ' de compra.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_ALBARANES . ' de compra.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=albaranesprov';
@@ -163,7 +162,7 @@ class fsdk_home extends fs_controller
                 case 'albaranescli':
                     if (class_exists('albaran_cliente')) {
                         $num = $gdp->albaranescli();
-                        $this->new_message('Generados ' . $num . ' ' . FS_ALBARANES . ' de venta.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_ALBARANES . ' de venta.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=albaranescli';
@@ -175,7 +174,7 @@ class fsdk_home extends fs_controller
                 case 'servicioscli':
                     if (class_exists('servicio_cliente')) {
                         $num = $gdp->servicioscli();
-                        $this->new_message('Generados ' . $num . ' ' . FS_SERVICIOS . ' a clientes.');
+                        $this->new_message('Generados ' . $num . ' ' . FS_SERVICIOS . ' a clientes.', true);
                         $this->new_message('Recargando... &nbsp; <i class="fa fa-refresh fa-spin"></i>');
 
                         $this->url_recarga = $this->url() . '&gdp=servicioscli';
@@ -204,8 +203,9 @@ class fsdk_home extends fs_controller
             return FALSE;
         } else if (!$this->genera_ficheros($nombre, $descripcion)) {
             return FALSE;
-        } else
-            return TRUE;
+        }
+
+        return TRUE;
     }
 
     private function crea_estructura($nombre)
@@ -235,18 +235,20 @@ class fsdk_home extends fs_controller
         if (!file_put_contents("plugins/" . $nombre . "/description", $descripcion)) {
             return FALSE;
         }
+
         if (!file_put_contents("plugins/" . $nombre . "/facturascripts.ini", "version = 1")) {
             return FALSE;
-        } else {
-            $textcontroller = str_replace("holamundo", $nombre, file_get_contents(__DIR__ . '/../tmpls/controller.php'));
-            $textvista = file_get_contents(__DIR__ . '/../tmpls/view.html');
-
-            if (!file_put_contents("plugins/" . $nombre . "/controller/" . $nombre . ".php", $textcontroller)) {
-                return FALSE;
-            } else if (!file_put_contents("plugins/" . $nombre . "/view/" . $nombre . ".html", $textvista)) {
-                return FALSE;
-            } else
-                return TRUE;
         }
+
+        $textcontroller = str_replace("holamundo", $nombre, file_get_contents(__DIR__ . '/../tmpls/controller.php'));
+        $textvista = file_get_contents(__DIR__ . '/../tmpls/view.html');
+
+        if (!file_put_contents("plugins/" . $nombre . "/controller/" . $nombre . ".php", $textcontroller)) {
+            return FALSE;
+        } else if (!file_put_contents("plugins/" . $nombre . "/view/" . $nombre . ".html", $textvista)) {
+            return FALSE;
+        }
+
+        return TRUE;
     }
 }
